@@ -329,7 +329,13 @@
     tsel = setTimeout(showNewBar, 350);
   });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") { hideBar(); dlg.hidden = true; closeDrawer(); }
+    if (e.key !== "Escape") return;
+    // Esc: drop the text selection (and its colour bar), close the note box and the drawer
+    var sel = window.getSelection();
+    if (sel && !sel.isCollapsed) sel.removeAllRanges();
+    hideBar(); dlg.hidden = true; closeDrawer();
+    var fl = root.querySelectorAll("mark.hl-flash");
+    for (var i = 0; i < fl.length; i++) fl[i].classList.remove("hl-flash");
   });
   window.addEventListener("scroll", function () { if (!bar.hidden && !pending) hideBar(); }, { passive: true });
   function find(id) {
