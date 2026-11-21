@@ -1,0 +1,5 @@
+v[0..199]'=v[j]-v[j]^3/3-w[j]+i
+w[0..199]'=eps*(v[j]+a-b*w[j])
+par i=0.5,a=0.7,b=0.8,eps=0.08
+@ dt=0.01,meth=rungekutta,maxstor=400000
+done

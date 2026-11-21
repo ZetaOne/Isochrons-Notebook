@@ -1,0 +1,41 @@
+# stage1_gui.xps -- stage 1 of one isochron (theta = 0) of the reduced HH model,
+# Osinga & Moehlis's continuation, shown step by step.  Run:
+#   ./xppaut-8.4/xppaut isochron_bvp.ode -script stage1_gui.xps
+speed 0.15
+set xp=v;yp=n;xlo=-90;xhi=52;ylo=0.3;yhi=0.8
+set d=0;per=11.84627503;gv=44.70638155;gn=0.4597360195;tv=0.9999999906;tn=-0.0001371078909
+set v=44.70638155;n=0.4597360195
+msg "Γ from gamma(0): one period (per = T, time scaled to [0,1])"
+keys i g
+wait 2
+keys f a
+msg "AUTO: the BVP u' = per F(u), u(1) = gamma + d n_s; start with 6 small steps"
+autokeys n
+ans Ntst=100|Nmax=6|NPr=100000|Ds=1e-05|Dsmin=1e-08|Dsmax=1e-06|Par Min=-1|Par Max=1|ITNW=5
+autokeys r b
+wait 1
+auto goto last
+msg "continue in d one way (inside Γ), |d| < eta = 1e-4"
+autokeys n
+ans Nmax=5000|Ds=1e-05|Dsmax=0.1|Par Min=-0.0001|Par Max=0.0001
+autokeys r
+wait 1
+autokeys f s
+ans gui_inside.dgm
+msg "the other way (outside Γ): same start again"
+autokeys f r
+ans y
+autokeys f c
+keys i g
+autokeys n
+ans Ntst=100|Nmax=6|Ds=1e-05|Dsmax=1e-06|Par Min=-1|Par Max=1
+autokeys r b
+auto goto last
+autokeys n
+ans Nmax=300|Ds=-1e-05|Dsmax=0.1|Par Min=-0.0001|Par Max=0.0001
+autokeys r
+autokeys f s
+ans gui_outside.dgm
+msg "done: the last point's orbit segment starts on the isochron and lands on gamma"
+auto goto last
+keys i g

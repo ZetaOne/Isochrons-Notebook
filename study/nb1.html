@@ -1,0 +1,1346 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notebook 1: isochrons by brute force · notebook</title>
+<meta name="description" content="FitzHugh–Nagumo then the reduced Hodgkin–Huxley model, by integrating every point.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="../icon-32.png"><link rel="apple-touch-icon" href="../icon-192.png">
+<script>
+  // apply the saved display choices before the page is drawn (no flash of the wrong colours or size);
+  // new visitors get Funky 2 (Night Owl), 100 % text and the system font
+  (function () {
+    var d = document.documentElement, q = {}, DARK = {"system": null, "light": false, "dark": true, "midnight": true, "solarized-light": false, "solarized-dark": true, "nord": true, "dracula": true, "sepia": false, "contrast": true, "funky1": true, "funky2": true, "funky3": true}, FONTS = {"system": "", "serif": "", "atkinson": "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap", "lexend": "https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap"}, SIZES = ["90", "100", "112", "125"];
+    function get(k) { try { return localStorage.getItem(k) } catch (e) { return null } }
+    try { new URLSearchParams(location.search).forEach(function (v, k) { q[k] = v }) } catch (e) {}
+    var t = q.theme || get('pyauto-xpp-theme') || 'light'; if (!(t in DARK)) t = 'light';
+    var z = q.textsize || get('pyauto-xpp-textsize') || '100'; if (SIZES.indexOf(z) < 0) z = '100';
+    var f = q.font || get('pyauto-xpp-font') || 'system'; if (!(f in FONTS)) f = 'system';
+    if (t !== 'system') d.dataset.theme = t;
+    d.dataset.textsize = z; d.dataset.font = f;
+    var dark = t === 'system' ? matchMedia('(prefers-color-scheme: dark)').matches : DARK[t];
+    d.dataset.code = dark ? 'dark' : 'light';
+    var ls = document.querySelectorAll('link[data-code]');
+    for (var i = 0; i < ls.length; i++) ls[i].media = ls[i].dataset.code === d.dataset.code ? 'all' : 'not all';
+    if (FONTS[f]) {
+      var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = FONTS[f]; l.id = 'webfont-' + f;
+      document.head.appendChild(l);
+    }
+    window.PYX_DISPLAY = { theme: t, size: z, font: f, DARK: DARK, FONTS: FONTS, SIZES: SIZES };
+  })();
+</script>
+<link rel="stylesheet" data-code="dark" href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-vsc-dark-plus.min.css" integrity="sha512-ML8rkwYTFNcblPFx+VLgFIT2boa6f8DDP6p6go4+FT0/mJ8DCbCgi6S0UdjtzB3hKCr1zhU+YVB0AHhIloZP8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"><link rel="stylesheet" data-code="light" href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-vs.min.css" integrity="sha512-Jn4HzkCnzA7Bc+lbSQHAMeen0EhSTy71o9yJbXZtQx9VvozKVBV/2zfR3VyuDFIxGvHgbOMMNvb80l+jxFBC1Q==" crossorigin="anonymous" referrerpolicy="no-referrer"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>:root {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color-scheme: light dark;
+  --bg: #f4f4f2;
+  --fg: #1d1d1b;
+  --muted: #6b6b66;
+  --bar: #ffffff;
+  --line: #d8d8d2;
+  --desk: #5c6670;
+  --panel-bar: #e6e6e1;
+  --panel-bar-active: #d5dbe3;
+  --hint: #e8ebee;
+  --hint-muted: #c3cad1;
+  --accent: #2f5d8a;
+  --accent-fg: #ffffff;
+  --term-bg: #1b1c1e;
+  --term-head: #26282b;
+  --term-fg: #e4e4e0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #18191b;
+    --fg: #e6e6e3;
+    --muted: #9a9a95;
+    --bar: #222326;
+    --line: #34363a;
+    --desk: #2a3038;
+    --panel-bar: #34363a;
+    --panel-bar-active: #3d4652;
+    --accent: #4b7fb3;
+  }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #18191b;
+  --fg: #e6e6e3;
+  --muted: #9a9a95;
+  --bar: #222326;
+  --line: #34363a;
+  --desk: #2a3038;
+  --panel-bar: #34363a;
+  --panel-bar-active: #3d4652;
+  --accent: #4b7fb3;
+}
+:root[data-theme='midnight'] {
+  color-scheme: dark;
+  --bg: #0b1426;
+  --fg: #dbe4f3;
+  --muted: #8ea0bf;
+  --bar: #101d36;
+  --line: #22355a;
+  --desk: #14274a;
+  --panel-bar: #1c3158;
+  --panel-bar-active: #26437a;
+  --hint: #dbe4f3;
+  --hint-muted: #8ea0bf;
+  --accent: #3d7bd9;
+  --term-bg: #08101f;
+  --term-head: #101d36;
+  --term-fg: #cfdcf2;
+}
+:root[data-theme='solarized-light'] {
+  color-scheme: light;
+  --bg: #fdf6e3;
+  --fg: #586e75;
+  --muted: #93a1a1;
+  --bar: #eee8d5;
+  --line: #d9d2bd;
+  --desk: #586e75;
+  --panel-bar: #eee8d5;
+  --panel-bar-active: #e4dcc3;
+  --hint: #fdf6e3;
+  --hint-muted: #eee8d5;
+  --accent: #268bd2;
+  --term-bg: #002b36;
+  --term-head: #073642;
+  --term-fg: #93a1a1;
+}
+:root[data-theme='solarized-dark'] {
+  color-scheme: dark;
+  --bg: #002b36;
+  --fg: #93a1a1;
+  --muted: #657b83;
+  --bar: #073642;
+  --line: #0f4a59;
+  --desk: #0a3a47;
+  --panel-bar: #073642;
+  --panel-bar-active: #0f4a59;
+  --hint: #93a1a1;
+  --hint-muted: #657b83;
+  --accent: #268bd2;
+  --term-bg: #001f27;
+  --term-head: #073642;
+  --term-fg: #93a1a1;
+}
+:root[data-theme='nord'] {
+  color-scheme: dark;
+  --bg: #2e3440;
+  --fg: #e5e9f0;
+  --muted: #a3acbd;
+  --bar: #3b4252;
+  --line: #4c566a;
+  --desk: #434c5e;
+  --panel-bar: #3b4252;
+  --panel-bar-active: #4c566a;
+  --hint: #eceff4;
+  --hint-muted: #d8dee9;
+  --accent: #5e81ac;
+  --term-bg: #242933;
+  --term-head: #2e3440;
+  --term-fg: #d8dee9;
+}
+:root[data-theme='dracula'] {
+  color-scheme: dark;
+  --bg: #21222c;
+  --fg: #f8f8f2;
+  --muted: #a4a7c4;
+  --bar: #282a36;
+  --line: #44475a;
+  --desk: #343746;
+  --panel-bar: #44475a;
+  --panel-bar-active: #6272a4;
+  --hint: #f8f8f2;
+  --hint-muted: #bd93f9;
+  --accent: #bd93f9;
+  --accent-fg: #21222c;
+  --term-bg: #191a21;
+  --term-head: #282a36;
+  --term-fg: #f8f8f2;
+}
+:root[data-theme='sepia'] {
+  color-scheme: light;
+  --bg: #f4ecd8;
+  --fg: #4b3b2a;
+  --muted: #8a7558;
+  --bar: #faf4e6;
+  --line: #ddcfb0;
+  --desk: #7a6344;
+  --panel-bar: #ebdfc4;
+  --panel-bar-active: #dccaa3;
+  --hint: #faf4e6;
+  --hint-muted: #f1e6cc;
+  --accent: #8b5a2b;
+  --term-bg: #2b2117;
+  --term-head: #3a2d20;
+  --term-fg: #eadcc3;
+}
+:root[data-theme='contrast'] {
+  color-scheme: dark;
+  --bg: #000000;
+  --fg: #ffffff;
+  --muted: #e0e0e0;
+  --bar: #000000;
+  --line: #ffffff;
+  --desk: #000000;
+  --panel-bar: #000000;
+  --panel-bar-active: #1a1a1a;
+  --hint: #ffffff;
+  --hint-muted: #ffff00;
+  --accent: #ffff00;
+  --accent-fg: #000000;
+  --term-bg: #000000;
+  --term-head: #000000;
+  --term-fg: #ffffff;
+}
+/* Fairy Floss, github.com/sailorhg/fairyfloss (MIT): palette on the page around XPP, with a glow behind the windows */
+:root[data-theme='funky1'] {
+  color-scheme: dark;
+  --bg: #4a4466;
+  --fg: #f8f8f2;
+  --muted: #cbc4e6;
+  --bar: #5a5475;
+  --line: #716799;
+  --desk: radial-gradient(circle at 12% 18%, #ffb8d155 0, transparent 42%),
+    radial-gradient(circle at 88% 28%, #c2ffdf50 0, transparent 42%),
+    radial-gradient(circle at 50% 100%, #c5a3ff48 0, transparent 50%),
+    #5a5475;
+  --panel-bar: #716799;
+  --panel-bar-active: #8077a8;
+  --hint: #f8f8f2;
+  --hint-muted: #fff352;
+  --accent: #ffb8d1;
+  --accent-fg: #3f3a56;
+  --term-bg: #3f3a56;
+  --term-head: #4a4466;
+  --term-fg: #f8f8f2;
+  --stripe: linear-gradient(90deg, #ffb8d1, #c5a3ff, #c2ffdf, #fff352, #ff857f);
+}
+/* Night Owl, github.com/sdras/night-owl-vscode-theme (MIT): palette on the page around XPP, with a glow behind the windows */
+:root[data-theme='funky2'] {
+  color-scheme: dark;
+  --bg: #01111d;
+  --fg: #d6deeb;
+  --muted: #7e97ac;
+  --bar: #011627;
+  --line: #1d3b53;
+  --desk: radial-gradient(circle at 12% 18%, #82aaff55 0, transparent 42%),
+    radial-gradient(circle at 88% 28%, #c792ea50 0, transparent 42%),
+    radial-gradient(circle at 50% 100%, #addb6748 0, transparent 50%),
+    #011627;
+  --panel-bar: #0b2942;
+  --panel-bar-active: #1d3b53;
+  --hint: #d6deeb;
+  --hint-muted: #7fdbca;
+  --accent: #82aaff;
+  --accent-fg: #011627;
+  --term-bg: #010e1a;
+  --term-head: #01111d;
+  --term-fg: #d6deeb;
+  --stripe: linear-gradient(90deg, #82aaff, #c792ea, #7fdbca, #addb67, #f78c6c);
+}
+/* Synthwave '84, github.com/robb0wen/synthwave-vscode (MIT): palette on the page around XPP, with a glow behind the windows */
+:root[data-theme='funky3'] {
+  color-scheme: dark;
+  --bg: #1e1a2b;
+  --fg: #ffffff;
+  --muted: #b6b1d0;
+  --bar: #241b2f;
+  --line: #463465;
+  --desk: radial-gradient(circle at 12% 18%, #ff7edb55 0, transparent 42%),
+    radial-gradient(circle at 88% 28%, #36f9f650 0, transparent 42%),
+    radial-gradient(circle at 50% 100%, #fede5d48 0, transparent 50%),
+    #262335;
+  --panel-bar: #34294f;
+  --panel-bar-active: #463465;
+  --hint: #ffffff;
+  --hint-muted: #fede5d;
+  --accent: #ff7edb;
+  --accent-fg: #241b2f;
+  --term-bg: #171520;
+  --term-head: #241b2f;
+  --term-fg: #f4eee4;
+  --stripe: linear-gradient(90deg, #ff7edb, #36f9f6, #fede5d, #f97e72, #72f1b8);
+}
+
+/* ---- toolbar and menus (shared by the main page and the manual) ------------- */
+* { box-sizing: border-box }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 40; padding: 8px 12px; background: var(--bar); color: var(--fg); border: 1px solid var(--line); border-radius: 4px }
+.skip:focus { left: 8px }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+.bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 16px; padding: 6px 12px;
+       min-height: 48px; background: var(--bar); border-bottom: 1px solid var(--line); font-size: .875rem }
+/* funky themes: a multi-coloured stripe under the toolbar (as XPPAUT-Web) */
+:root[data-theme^='funky'] .bar { border-bottom: 3px solid transparent; border-image: var(--stripe) 1 }
+.brand { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; font-weight: 600; color: var(--fg); text-decoration: none; white-space: nowrap }
+.brand img { width: 22px; height: 22px; border-radius: 5px; flex: none }
+.right { margin-left: auto; display: flex; align-items: center; gap: 10px }
+.bar details { position: relative }
+.bar summary { list-style: none } .bar summary::-webkit-details-marker { display: none }
+.round { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid var(--line); flex: none;
+       border-radius: 50%; background: var(--bg); color: var(--fg); cursor: pointer }
+.round:hover, details[open] > summary.round { background: var(--panel-bar-active) }
+.panel { position: absolute; z-index: 100; top: calc(100% + 6px); right: 0; display: grid; gap: 2px; min-width: 220px;
+       max-height: calc(100vh - 70px); overflow: auto; padding: 6px; background: var(--bar); border: 1px solid var(--line);
+       border-radius: 6px; box-shadow: 0 6px 20px rgb(0 0 0 / 0.25) }
+.panel button, .panel a { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 8px; border: 0; border-radius: 4px;
+       background: transparent; color: var(--fg); font: inherit; text-align: left; text-decoration: none; cursor: pointer }
+.panel button:hover, .panel a:hover, .panel button[aria-checked='true'] { background: var(--panel-bar-active) }
+.panel .head { padding: 4px 8px 2px; font-size: .75rem; color: var(--muted) }
+.swatch { display: inline-flex; width: 34px; height: 18px; overflow: hidden; border: 1px solid rgb(127 127 127 / 0.5); border-radius: 3px; flex: none }
+.swatch i { flex: 1 }
+@media (pointer: coarse) {
+  .panel button, .panel a { min-height: 44px }
+  .round { width: 40px; height: 40px }
+}
+
+
+/* ---- display: text size and font (see DISPLAY_* in make_site.py) ------------ */
+/* XPPAUT-Web's theme sets 14px on :root; here 1rem is the reader's text size */
+:root { font-size: 100%; --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+        --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif }
+:root[data-textsize='90'] { font-size: 90% }
+:root[data-textsize='112'] { font-size: 112% }
+:root[data-textsize='125'] { font-size: 125% }
+:root[data-font='serif'] { --font-body: Charter, 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif }
+:root[data-font='atkinson'] { --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif }
+:root[data-font='lexend'] { --font-body: 'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif }
+body { font-family: var(--font-body) }
+code, pre, kbd, samp { font-family: var(--font-mono) }
+/* the panel */
+.dpanel { width: min(300px, calc(100vw - 24px)); gap: 0 }
+.dpanel .head { padding: 8px 8px 4px; font-weight: 600 }
+.dpanel .head:first-child { padding-top: 2px }
+.dpanel .grp { display: grid; gap: 2px }
+.dpanel .sep { height: 1px; margin: 6px 2px 0; background: var(--line) }
+.dpanel .seg { grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 0 2px }
+.dpanel .seg button { flex-direction: column; justify-content: center; gap: 0; padding: 4px 0; border: 1px solid var(--line); text-align: center }
+.dpanel .seg button[aria-checked='true'] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent) }
+.dpanel .seg b { line-height: 1.15 }
+.dpanel .seg small { font-size: .6875rem; color: var(--muted) }
+.dpanel .fontlist button[aria-checked='true'], .dpanel .themelist button[aria-checked='true'] { box-shadow: inset 3px 0 0 var(--accent) }
+.dpanel .fontlist span { flex: 1 }
+.dpanel .fontlist small { color: var(--muted); font-size: .75rem; font-family: var(--font-body) }
+
+
+html { scroll-behavior: smooth }
+body { margin: 0; background: var(--bg); color: var(--fg); line-height: 1.55 }
+a { color: var(--accent) }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px }
+.nav { display: flex; gap: 2px }
+.nav a { padding: 8px 10px; border-radius: 6px; color: var(--fg); text-decoration: none }
+.nav a:hover { background: var(--panel-bar-active) }
+.menu { display: none }
+h1, h2, h3 { line-height: 1.2 }
+h2 { font-size: 1.5rem; margin: 2.2rem 0 .4rem }
+.lead { color: var(--muted); margin: 0 0 1rem; max-width: 60rem }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 8px; border: 1px solid var(--accent);
+       background: var(--accent); color: var(--accent-fg); font-weight: 600; text-decoration: none; font-size: .9375rem; cursor: pointer }
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line) }
+.btn.ghost:hover { border-color: var(--accent) }
+.btn small { font-weight: 400; opacity: .8 }
+.tag { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); font-size: .75rem;
+       color: var(--muted); text-decoration: none; white-space: nowrap }
+a.tag:hover { border-color: var(--accent); color: var(--fg) }
+.fig-bg { background: #fff; border-radius: 8px }
+footer { margin-top: 48px; padding: 22px 0 30px; border-top: 1px solid var(--line); background: var(--bar);
+         font-size: .84375rem; color: var(--muted) }
+footer a { color: var(--fg) }
+@media (max-width: 760px) {
+  .nav { display: none }
+  .menu { display: block }
+}
+
+
+:root[data-code='dark'] { --cb-bg: #1e1e1e; --cb-head: #252526; --cb-headfg: #c5c5c5; --cb-line: #3c3c3c; --cb-fg: #d4d4d4; --cb-num: #6e7681 }
+:root[data-code='light'] { --cb-bg: #ffffff; --cb-head: #f3f3f3; --cb-headfg: #5c5c5c; --cb-line: #dcdcdc; --cb-fg: #1f1f1f; --cb-num: #9a9a9a }
+.cb { margin: 1em 0 1.3em; border: 1px solid var(--cb-line); border-radius: 8px; overflow: hidden; background: var(--cb-bg) }
+.cb-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 32px; padding: 0 6px 0 12px;
+       background: var(--cb-head); color: var(--cb-headfg); border-bottom: 1px solid var(--cb-line); font-size: .75rem }
+.cb-head button, .cb-head a { font: inherit; color: inherit; background: transparent; border: 1px solid var(--cb-line); border-radius: 5px;
+       padding: 3px 9px; cursor: pointer; text-decoration: none }
+.cb-body { display: grid; grid-template-columns: auto 1fr; overflow-x: auto }
+.cb pre { margin: 0; padding: 12px 14px; font: .8125rem/1.55 var(--font-mono); background: transparent !important; color: var(--cb-fg);
+       tab-size: 4; overflow: visible }
+.cb pre code { font: inherit; background: transparent !important; text-shadow: none }
+.cb pre.ln { color: var(--cb-num); text-align: right; user-select: none; padding-right: 10px; border-right: 1px solid var(--cb-line) }
+.cb.out { background: color-mix(in srgb, var(--cb-bg) 94%, var(--fg)) }
+.cb.out pre { white-space: pre-wrap }
+.doc { max-width: 52rem }
+.doc img { max-width: 100%; background: #fff; border-radius: 6px }
+.doc table { border-collapse: collapse; margin: 1em 0; font-size: .9375rem }
+.doc th, .doc td { border: 1px solid var(--line); padding: 4px 10px; text-align: left; vertical-align: top }
+.doc code { font-size: .875em; background: color-mix(in srgb, var(--fg) 8%, transparent); padding: 1px 4px; border-radius: 4px }
+.doc pre code { background: transparent; padding: 0 }
+.doc blockquote { margin: 1em 0; padding: .2em 1em; border-left: 3px solid var(--accent); color: var(--muted) }
+.crumbs { font-size: .875rem; color: var(--muted); margin: 18px 0 0 }
+.crumbs a { color: var(--muted) }
+.pagehead h1 { font-size: 1.75rem; margin: .3rem 0 .4rem; font-family: var(--font-mono) }
+.pagehead h1.prose { font-family: inherit }
+.pagehead p { margin: .2rem 0 .6rem; color: var(--muted); max-width: 52rem }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: .6rem 0 }
+.figs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin: 1rem 0 }
+.figs a { display: block; background: #fff; border-radius: 8px; border: 1px solid var(--line); overflow: hidden }
+.figs img { width: 100%; display: block }
+.cell-md { margin: 1.2rem 0 }
+.cell-n { font: .6875rem var(--font-mono); color: var(--muted); margin: 1rem 0 -.6rem }
+.cell-img { max-width: 100%; background: #fff; border-radius: 6px; display: block; margin: .4rem 0 1rem }
+.flist { list-style: none; padding: 0; display: grid; gap: 8px }
+.flist li { display: grid; grid-template-columns: minmax(12rem, auto) 1fr; gap: 4px 14px; padding: 10px 12px; background: var(--bar);
+            border: 1px solid var(--line); border-radius: 8px }
+.flist li a { font-family: var(--font-mono); font-weight: 600 }
+.flist li span { color: var(--muted) }
+@media (max-width: 760px) { .flist li { grid-template-columns: 1fr } }
+</style>
+
+</head><body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar">
+  <a class="brand" href="../index.html"><img src="../icon-192.png" alt="" width="22" height="22">notebook</a>
+  <nav class="nav" aria-label="Sections"><a href="../index.html#book">Book</a><a href="../index.html#chapters">Chapters</a><a href="../index.html#study">Study kit</a><a href="../code/index.html">Code</a><a href="../index.html#highlights">My highlights</a></nav>
+  <div class="right">
+    <details class="display" id="themes">
+      <summary class="round" title="Display: theme, text size, font" aria-label="Display: theme, text size and font">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none"
+          stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+      </summary>
+      <div class="panel dpanel" id="displaypanel" role="group" aria-label="Display">
+        <div class="head" id="dh-size">Text size</div>
+        <div class="grp seg" id="sizelist" role="radiogroup" aria-labelledby="dh-size"></div>
+        <div class="sep"></div>
+        <div class="head" id="dh-font">Font</div>
+        <div class="grp fontlist" id="fontlist" role="radiogroup" aria-labelledby="dh-font"></div>
+        <div class="sep"></div>
+        <div class="head" id="dh-theme">Theme (as XPPAUT-Web)</div>
+        <div class="grp themelist" id="themelist" role="radiogroup" aria-labelledby="dh-theme"></div>
+      </div>
+    </details>
+    <details class="menu"><summary class="round" aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary>
+      <div class="panel" role="menu"><a role="menuitem" href="../index.html#book">Book</a><a role="menuitem" href="../index.html#chapters">Chapters</a><a role="menuitem" href="../index.html#study">Study kit</a><a role="menuitem" href="../code/index.html">Code</a><a role="menuitem" href="../index.html#highlights">My highlights</a><a role="menuitem" href="https://sites.me.ucsb.edu/~moehlis/moehlis_papers/isochrons.pdf" target="_blank" rel="noopener">The paper (PDF)</a></div></details>
+  </div>
+</header>
+<main id="main">
+<div class="wrap">
+<p class="crumbs"><a href="../index.html">Library</a> / <a href="../index.html#study">Study kit</a> / stage_01_basics-isochron.ipynb</p>
+<div class="pagehead"><h1 class="prose">Notebook 1: isochrons by brute force</h1><p>FitzHugh&ndash;Nagumo then the reduced Hodgkin&ndash;Huxley model, by integrating every point.</p>
+<div class="row"><a class="tag" href="../notebook.html#ch04">Ch. 4 &middot; Asymptotic Phase and Isochrons</a> <a class="tag" href="../notebook.html#ch09">Ch. 10 &middot; Computing Isochrons: The Problem</a></div>
+<div class="row"><a class="btn ghost" href="files/stage_01_basics-isochron.ipynb" download>Download stage_01_basics-isochron.ipynb</a></div></div>
+<div class="cell-md doc"><h1
+id="isochrons-01.-what-is-an-isochron-fitzhugh-nagumo-then-the-reduced-hodgkin-huxley-neuron">Isochrons
+01. What is an isochron? FitzHugh-Nagumo, then the reduced
+Hodgkin-Huxley neuron</h1>
+<p><a
+href="https://colab.research.google.com/github/ZetaOne/pyauto-xpp/blob/main/isochrons/01_FHN_basics-isochron.ipynb"><img
+src="https://colab.research.google.com/assets/colab-badge.svg"
+alt="Open in Colab" /></a></p>
+<p>An oscillator has a clock: its <strong>phase</strong>. On the limit
+cycle the phase is easy to read. This notebook answers one question:
+<em>what is the phase of a point that is not on the limit cycle?</em>
+The answer is the <strong>asymptotic phase</strong>, and the curves of
+equal asymptotic phase are the <strong>isochrons</strong>.</p>
+<p>We build the idea in small steps, by computing everything:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>part</th>
+<th>what you will see</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A. FitzHugh-Nagumo</td>
+<td>1. phase on the cycle · 2. a point off the cycle catches up with one
+point of the cycle · 3. the phase map and its contour lines, the
+isochrons · 4. points on one isochron move together · 5. why it matters:
+kicks and the phase response curve · 6. near the cycle an isochron is a
+straight line</td>
+</tr>
+<tr class="even">
+<td>B. Reduced Hodgkin-Huxley</td>
+<td>the same steps for the neuron of Osinga &amp; Moehlis; why its
+isochrons are hard</td>
+</tr>
+</tbody>
+</table>
+<p>Every simulation runs in XPPAUT 8.2 through pyauto-xpp, and each
+model’s <code>.ode</code> file is printed, so you can repeat any step in
+XPPAUT itself.</p>
+<p>Needs: <code>pip install pyauto-xpp numpy matplotlib tqdm</code></p>
+</div>
+<div class="cell-md doc"><p>Running in Google Colab? This cell installs pyauto-xpp first;
+elsewhere it does nothing.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [ ] &middot; 3 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3</pre><pre><code class="language-python">import sys
+if &quot;google.colab&quot; in sys.modules:
+    %pip -q install pyauto-xpp tqdm --find-links https://github.com/ZetaOne/pyauto-xpp/releases/expanded_assets/v0.3.0</code></pre></div></div>
+<div class="cb"><div class="cb-head"><span>In [1] &middot; 10 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre><pre><code class="language-python">import tempfile
+from pathlib import Path
+
+import matplotlib.pyplot as plt
+import numpy as np
+from pyxpp.builder import ModelBuilder
+from tqdm.auto import tqdm
+
+WORK = Path(tempfile.mkdtemp())
+plt.rcParams.update({&quot;figure.dpi&quot;: 100, &quot;axes.grid&quot;: False})</code></pre></div></div>
+<div class="cell-md doc"><h1 id="part-a.-fitzhugh-nagumo">Part A. FitzHugh-Nagumo</h1>
+<p>The FitzHugh-Nagumo model is the simplest model of an excitable
+neuron, and a relaxation oscillator like the van der Pol oscillator of
+Strogatz section 7.5:</p>
+<p><span class="math display">\[ \dot v = v - \frac{v^3}{3} - w + I,
+\qquad \dot w = \varepsilon\,(v + a - b w) \]</span></p>
+<p>v is a fast voltage-like variable, w a slow recovery variable. With a
+= 0.7, b = 0.8, ε = 0.08 and I = 0.5 the equilibrium is unstable and
+every trajectory goes to one stable limit cycle Γ: the neuron fires
+periodically.</p>
+<h2 id="a0.-the-model-in-xppaut">A0. The model in XPPAUT</h2>
+</div>
+<div class="cb"><div class="cb-head"><span>In [2] &middot; 7 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7</pre><pre><code class="language-python">fhn = (ModelBuilder(&quot;fhn&quot;)
+       .ode(&quot;v&quot;, &quot;v-v^3/3-w+i&quot;).ode(&quot;w&quot;, &quot;eps*(v+a-b*w)&quot;)
+       .parameter(i=0.5, a=0.7, b=0.8, eps=0.08)
+       .initial(v=-1, w=1)
+       .option(total=400, dt=0.01, meth=&quot;rk4&quot;, bound=1e6, maxstor=200000))
+print(fhn.render())
+m = fhn.load(WORK / &quot;fhn.ode&quot;)</code></pre></div></div>
+<div class="cb out"><pre>v&#x27;=v-v^3/3-w+i
+w&#x27;=eps*(v+a-b*w)
+par i=0.5,a=0.7,b=0.8,eps=0.08
+init v=-1,w=1
+@ total=400,dt=0.01,meth=rungekutta,bound=1000000.0,maxstor=200000
+done
+
+</pre></div>
+<div class="cell-md doc"><h2 id="a1.-phase-on-the-cycle">A1. Phase on the cycle</h2>
+<ol type="1">
+<li>Integrate long enough to land on the cycle (XPP: <em>Initialconds
+&gt; Go</em>).</li>
+<li><em>Initialconds &gt; Periodic</em> finds the period T.</li>
+<li>Choose phase zero: the point γ0 where v is largest (the top of the
+spike).</li>
+<li>A point reached from γ0 after time t has phase θ = t/T, a number in
+[0, 1).</li>
+</ol>
+<p>The phase is a clock that runs at a steady rate 1/T around the
+cycle.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [3] &middot; 25 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre><pre><code class="language-python">m.run()
+m.buttons.xi_vs_t(&quot;v&quot;)
+m.buttons.initialconds.periodic()                 # XPP: Initialconds &gt; Periodic
+T = m.numerics[&quot;total&quot;]
+cyc = m.run(keep=False, total=T, dt=0.001)
+k0 = int(np.argmax(cyc[&quot;v&quot;]))                      # the top of the spike
+gamma0 = np.array([cyc[&quot;v&quot;][k0], cyc[&quot;w&quot;][k0]])
+m.set(v=gamma0[0], w=gamma0[1])
+cyc = m.run(keep=False, total=T, dt=0.001)         # one period, starting at phase 0
+eq = m.equilibrium({&quot;v&quot;: -0.5, &quot;w&quot;: 0.0})
+xstar = np.array([eq.x[&quot;V&quot;], eq.x[&quot;W&quot;]])
+print(f&quot;period T = {T:.4f}; gamma0 = ({gamma0[0]:.4f}, {gamma0[1]:.4f}); &quot;
+      f&quot;equilibrium x* = ({xstar[0]:.4f}, {xstar[1]:.4f}), eigenvalues {np.round(eq.eigenvalues, 3)}&quot;)
+
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4))
+a1.plot(cyc.t / T, cyc[&quot;v&quot;], color=&quot;k&quot;)
+a1.set(xlabel=&quot;t / T  (= phase θ on the cycle)&quot;, ylabel=&quot;v&quot;, title=&quot;One period, starting at phase 0&quot;)
+a2.plot(cyc[&quot;v&quot;], cyc[&quot;w&quot;], color=&quot;0.6&quot;, lw=3)
+for th in np.arange(0, 1, 0.1):
+    j = int(th * (len(cyc.t) - 1))
+    a2.plot(cyc[&quot;v&quot;][j], cyc[&quot;w&quot;][j], &quot;o&quot;, color=plt.cm.hsv(th), ms=8)
+    a2.annotate(f&quot;{th:.1f}&quot;, (cyc[&quot;v&quot;][j], cyc[&quot;w&quot;][j]), xytext=(6, 4), textcoords=&quot;offset points&quot;)
+a2.plot(*xstar, &quot;x&quot;, color=&quot;k&quot;, ms=9)
+a2.set(xlabel=&quot;v&quot;, ylabel=&quot;w&quot;, title=&quot;Phase marks every 0.1 on Γ (x = unstable equilibrium)&quot;)
+plt.tight_layout(); plt.show()</code></pre></div></div>
+<div class="cb out"><pre>period T = 39.4744; gamma0 = (1.8521, 0.2343); equilibrium x* = (-0.8048, -0.1311), eigenvalues [0.144+0.191j 0.144-0.191j]
+</pre></div>
+<img class="cell-img" loading="lazy" src="nb/nb1_1.png" alt="output figure">
+<div class="cell-md doc"><p>The marks are crowded where the cycle moves slowly (the slow
+branches) and far apart on the fast jumps: equal steps in phase are
+equal steps in <strong>time</strong>, not in distance.</p>
+<h2
+id="a2.-a-point-off-the-cycle-catches-up-with-one-point-of-the-cycle">A2.
+A point off the cycle catches up with one point of the cycle</h2>
+<p>Take a point x0 that is <strong>not</strong> on Γ and integrate it.
+It converges to Γ, but where on Γ? Compare it with a point that moves
+around Γ. After the transient, the trajectory from x0 becomes
+indistinguishable from the trajectory of one particular point of Γ. That
+point’s phase is the <strong>asymptotic phase</strong> θ(x0) of x0:</p>
+<p><span class="math display">\[ \lim_{t\to\infty} \big\| \Phi(t, x_0) -
+\Phi(t + \theta(x_0)\,T,\ \gamma_0) \big\| = 0 \]</span></p>
+<p>How to measure it: wait until x0 has settled, note the time t_s of
+one of its spikes (v crossing 0 upward), and compare with the spike of
+the cycle that starts at γ0 at time t_c0. If x0 spikes earlier by a time
+Δ, it is ahead by Δ/T of a cycle:</p>
+<p><span class="math display">\[ \theta(x_0) = \frac{t_{c0} - t_s}{T}
+\mod 1 \]</span></p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [4] &middot; 29 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29</pre><pre><code class="language-python">def upcross(t, v, thr=0.0):
+    &quot;&quot;&quot;times where v crosses thr upward (linear interpolation)&quot;&quot;&quot;
+    i = np.nonzero((v[:-1] &lt; thr) &amp; (v[1:] &gt;= thr))[0]
+    return t[i] + (thr - v[i]) / (v[i + 1] - v[i]) * (t[i + 1] - t[i])
+
+
+m.set(v=gamma0[0], w=gamma0[1])
+ref = m.run(keep=False, total=6 * T, dt=0.01)
+tc0 = upcross(ref.t, ref[&quot;v&quot;])[0]                  # the cycle&#x27;s first spike after gamma0
+x0 = np.array([-1.0, 1.4])                         # a point off the cycle
+m.set(v=x0[0], w=x0[1])
+tr = m.run(keep=False, total=6 * T, dt=0.01)
+ts = upcross(tr.t, tr[&quot;v&quot;])[-1]                    # a spike after settling
+theta_x0 = ((tc0 - ts) / T) % 1
+print(f&quot;cycle spikes at t_c0 = {tc0:.3f} after gamma0; x0 spikes at t_s = {ts:.3f}&quot;)
+print(f&quot;asymptotic phase of x0 = ((t_c0 - t_s)/T) mod 1 = {theta_x0:.4f}&quot;)
+
+# the point of the cycle with that phase, followed together with x0
+g_th = np.array([np.interp(theta_x0 * T, cyc.t, cyc[&quot;v&quot;]), np.interp(theta_x0 * T, cyc.t, cyc[&quot;w&quot;])])
+m.set(v=g_th[0], w=g_th[1])
+tr2 = m.run(keep=False, total=6 * T, dt=0.01)
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4))
+a1.plot(tr.t / T, tr[&quot;v&quot;], label=&quot;from x0 (off the cycle)&quot;)
+a1.plot(tr2.t / T, tr2[&quot;v&quot;], &quot;--&quot;, label=f&quot;from the cycle point with phase {theta_x0:.3f}&quot;)
+a1.set(xlabel=&quot;t / T&quot;, ylabel=&quot;v&quot;, title=&quot;After the transient the two are the same&quot;)
+a1.legend(fontsize=8)
+a2.semilogy(tr.t / T, np.hypot(tr[&quot;v&quot;] - tr2[&quot;v&quot;], tr[&quot;w&quot;] - tr2[&quot;w&quot;]))
+a2.set(xlabel=&quot;t / T&quot;, ylabel=&quot;distance between them&quot;, title=&quot;The distance goes to 0&quot;)
+plt.tight_layout(); plt.show()</code></pre></div></div>
+<div class="cb out"><pre>cycle spikes at t_c0 = 36.848 after gamma0; x0 spikes at t_s = 221.770
+asymptotic phase of x0 = ((t_c0 - t_s)/T) mod 1 = 0.3154
+</pre></div>
+<img class="cell-img" loading="lazy" src="nb/nb1_2.png" alt="output figure">
+<div class="cell-md doc"><h2 id="a3.-the-phase-map-and-the-isochrons-as-its-contour-lines">A3.
+The phase map, and the isochrons as its contour lines</h2>
+<p>Do the same for every point of a grid: the asymptotic phase becomes a
+function θ(v, w) on the plane. The <strong>isochron</strong> of a point
+γ on Γ is the set of all points with the same asymptotic phase as γ,
+i.e. a contour line of θ. Points on one isochron end up moving together,
+in step with γ.</p>
+<p>To be fast, many points are integrated in one XPP run: an XPP
+<em>network</em> of N identical, uncoupled copies of the model
+(<code>v[0..N-1]</code>, <code>w[0..N-1]</code>). Its <code>.ode</code>
+file:</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [5] &middot; 73 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73</pre><pre><code class="language-python">NC = 200                                           # copies per XPP run
+
+
+def network(name, fun, rhs, pars, opts):
+    &quot;&quot;&quot;N uncoupled copies of a 2-variable model as one XPP model; rhs = {var: expr} in terms of the
+    single-copy variables, which are rewritten to their indexed form var[j]&quot;&quot;&quot;
+    nb = ModelBuilder(name)
+    for sig, expr in fun:
+        nb.function(sig, expr)
+    names = list(rhs)
+    for var, expr in rhs.items():
+        e = expr
+        for other in names:                         # v -&gt; v[j], w -&gt; w[j] (whole words only)
+            e = __import__(&quot;re&quot;).sub(rf&quot;\b{other}\b&quot;, f&quot;{other}[j]&quot;, e)
+        nb.ode(f&quot;{var}[0..{NC - 1}]&quot;, e)
+    return nb.parameter(**pars).option(maxstor=400000, **opts).load(WORK / f&quot;{name}.ode&quot;)
+
+
+FHN_RHS = {&quot;v&quot;: &quot;v-v^3/3-w+i&quot;, &quot;w&quot;: &quot;eps*(v+a-b*w)&quot;}
+net_fhn = network(&quot;fhn_net&quot;, [], FHN_RHS, dict(i=0.5, a=0.7, b=0.8, eps=0.08),
+                  dict(meth=&quot;rk4&quot;, dt=0.01, bound=1e6))
+print(&quot;\n&quot;.join(net_fhn.path.read_text().splitlines()[:4]), &quot;\n...&quot;)
+
+
+def phase_of(net, pts, T, tc0, var=(&quot;v&quot;, &quot;w&quot;), thr=0.0, nper=8, dt=0.01):
+    &quot;&quot;&quot;asymptotic phase of each point (NaN if it has not settled after nper periods)&quot;&quot;&quot;
+    pts = np.asarray(pts, float)
+    out = np.full(len(pts), np.nan)
+    net.numerics.update(dt=dt)
+    for i0 in range(0, len(pts), NC):
+        chunk = pts[i0:i0 + NC]
+        ic = {}
+        for j in range(NC):
+            x = chunk[j] if j &lt; len(chunk) else chunk[0]
+            ic[f&quot;{var[0]}{j}&quot;], ic[f&quot;{var[1]}{j}&quot;] = x[0], x[1]
+        net.ics.update(ic)
+        A = net.run(total=nper * T, trans=(nper - 2.5) * T).array
+        t, V = A[:, 0], A[:, 1:1 + len(chunk)]
+        for c in range(len(chunk)):
+            s = upcross(t, V[:, c], thr)
+            if len(s) &gt;= 2 and abs(s[-1] - s[-2] - T) &lt; 1e-3 * T:     # settled: spikes one period apart
+                out[i0 + c] = ((tc0 - s[-1]) / T) % 1
+    return out
+
+
+vg, wg = np.linspace(-2.5, 2.5, 81), np.linspace(-1.0, 2.0, 61)
+VG, WG = np.meshgrid(vg, wg)
+grid = np.c_[VG.ravel(), WG.ravel()]
+TH = np.concatenate([phase_of(net_fhn, grid[i:i + 1000], T, tc0)
+                     for i in tqdm(range(0, len(grid), 1000), desc=&quot;FHN phase map&quot;)]).reshape(VG.shape)
+print(f&quot;{np.isnan(TH).sum()} of {TH.size} grid points did not settle (they start very near x*)&quot;)
+# (the map is drawn below; it is also used in A4 and A6)
+
+
+def no_wrap(F):
+    &quot;&quot;&quot;F with the grid points next to a jump of more than 0.5 masked: there the phase wraps
+    from 1 to 0 (or crosses a strip too thin for the grid), and a contour drawn through the
+    jump would be a false line&quot;&quot;&quot;
+    bad = np.zeros(F.shape, bool)
+    dx = np.abs(np.diff(F, axis=1)) &gt; 0.5
+    dy = np.abs(np.diff(F, axis=0)) &gt; 0.5
+    bad[:, :-1] |= dx; bad[:, 1:] |= dx; bad[:-1, :] |= dy; bad[1:, :] |= dy
+    return np.ma.masked_where(bad | np.isnan(F), F)
+
+
+def draw_isochrons(ax, X, Y, TH, levels=np.arange(0.05, 1, 0.1), **kw):
+    &quot;&quot;&quot;contour lines of the phase. Levels near 0/1 are drawn from the phase shifted by half a
+    cycle, and grid cells at a jump are left out (no_wrap), so no false lines appear&quot;&quot;&quot;
+    S = (TH + 0.5) % 1
+    lo = [l for l in levels if 0.25 &lt;= l &lt;= 0.75]
+    hi = [(l + 0.5) % 1 for l in levels if not 0.25 &lt;= l &lt;= 0.75]
+    ax.contour(X, Y, no_wrap(TH), lo, **kw)
+    ax.contour(X, Y, no_wrap(S), sorted(hi), **kw)</code></pre></div></div>
+<div class="cb out"><pre>v[0..199]&#x27;=v[j]-v[j]^3/3-w[j]+i
+w[0..199]&#x27;=eps*(v[j]+a-b*w[j])
+par i=0.5,a=0.7,b=0.8,eps=0.08
+@ maxstor=400000,meth=rungekutta,dt=0.01,bound=1000000.0 
+...
+</pre></div>
+<div class="cb out"><pre>FHN phase map:   0%|          | 0/5 [00:00&lt;?, ?it/s]</pre></div>
+<div class="cb out"><pre>0 of 4941 grid points did not settle (they start very near x*)
+</pre></div>
+<div class="cell-md doc"><p><strong>The phase map</strong> (made by
+<code>make_isochron_figures.py</code> from the same kind of map, on a
+finer grid). The colour is the asymptotic phase, and the black lines are
+the isochrons θ = 0, 0.1, …, 0.9; the white dot is phase 0.</p>
+<figure>
+<img src="figures/fhn_phase_map_isochrons.png"
+alt="FHN: phase map and isochrons" />
+<figcaption aria-hidden="true">FHN: phase map and isochrons</figcaption>
+</figure>
+<p><strong>Points with the same colour end up together.</strong> Grid
+points coloured by their asymptotic phase, all integrated together and
+shown at a few moments: within about a period they are on the cycle, and
+each colour sits at its own point of it.</p>
+<figure>
+<img src="figures/fhn_flow_snapshots.png"
+alt="FHN: points coloured by asymptotic phase converge onto the cycle" />
+<figcaption aria-hidden="true">FHN: points coloured by asymptotic phase
+converge onto the cycle</figcaption>
+</figure>
+</div>
+<div class="cell-md doc"><p>What to see: * Each isochron crosses the cycle <strong>once</strong>,
+at the point with that phase, and runs on both sides of it. * Inside the
+cycle all isochrons converge on the unstable equilibrium x<em>: it has
+no asymptotic phase (it never reaches the cycle). This is the
+<strong>phaseless set</strong>. </em> Isochrons are bunched where the
+phase changes quickly with position, spread out where it changes
+slowly.</p>
+<h2 id="a4.-points-on-one-isochron-move-together">A4. Points on one
+isochron move together</h2>
+<p>Take all grid points with phase ≈ 0.25 (one isochron), and integrate
+them. At every time they lie on one isochron again (of phase 0.25 +
+t/T), and they all converge onto the <strong>same</strong> moving point
+of the cycle. That is what “same asymptotic phase” means.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [6] &middot; 21 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre><pre><code class="language-python">sel = grid[np.abs(TH.ravel() - 0.25) &lt; 0.004]
+times = [0, 0.2 * T, 0.5 * T, T, 2 * T]
+snap = []
+net_fhn.numerics.update(dt=0.01)
+ic = {}
+for j in range(NC):
+    x = sel[j] if j &lt; len(sel) else sel[0]
+    ic[f&quot;v{j}&quot;], ic[f&quot;w{j}&quot;] = x[0], x[1]
+net_fhn.ics.update(ic)
+A = net_fhn.run(total=2 * T, trans=0).array
+fig, axs = plt.subplots(1, len(times), figsize=(16, 3.4), sharey=True)
+for ax, tt in zip(axs, times):
+    k = int(np.argmin(np.abs(A[:, 0] - tt)))
+    ax.plot(cyc[&quot;v&quot;], cyc[&quot;w&quot;], color=&quot;0.7&quot;, lw=2)
+    ax.plot(A[k, 1:1 + len(sel[:NC])], A[k, 1 + NC:1 + NC + len(sel[:NC])], &quot;.&quot;, color=&quot;C3&quot;, ms=4)
+    th_now = (0.25 + tt / T) % 1
+    j = int(th_now * (len(cyc.t) - 1))
+    ax.plot(cyc[&quot;v&quot;][j], cyc[&quot;w&quot;][j], &quot;o&quot;, mfc=&quot;none&quot;, mec=&quot;k&quot;, ms=10)
+    ax.set(title=f&quot;t = {tt / T:.1f} T  (isochron {th_now:.2f})&quot;, xlabel=&quot;v&quot;)
+axs[0].set_ylabel(&quot;w&quot;)
+plt.tight_layout(); plt.show()</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb1_3.png" alt="output figure">
+<div class="cell-md doc"><p>The red points start spread along the isochron of phase 0.25. As time
+goes on they stay on one curve, which is an isochron again (the flow
+carries isochrons onto isochrons), and they shrink onto the circled
+point of the cycle, which has moved on by t/T.</p>
+<h2 id="a5.-why-it-matters-a-kick-and-the-phase-response-curve">A5. Why
+it matters: a kick and the phase response curve</h2>
+<p>A brief input (a current pulse) moves the state instantly, here by
+Δv. The state jumps from one isochron to another, and the difference of
+the two phases is the <strong>phase shift</strong> the kick causes: the
+oscillator now runs ahead or behind. Plotting the phase shift against
+the phase at which the kick arrives gives the <strong>phase response
+curve (PRC)</strong>, the basic object of phase models of coupled and
+forced oscillators.</p>
+<p>Below: the PRC for kicks Δv = 0.1 and 0.5, measured with the phase
+function of A2, and the infinitesimal PRC from XPP’s adjoint
+(<em>Numerics &gt; Averaging &gt; New adj</em>), which is the limit of
+small kicks: Δθ ≈ Z_v(θ) Δv / T.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [7] &middot; 19 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19</pre><pre><code class="language-python">ths = np.linspace(0, 1, 60, endpoint=False)
+on_cycle = np.c_[np.interp(ths * T, cyc.t, cyc[&quot;v&quot;]), np.interp(ths * T, cyc.t, cyc[&quot;w&quot;])]
+m.set(v=gamma0[0], w=gamma0[1])
+m.run(keep=False, total=T, dt=0.001)
+A_ = m.buttons.numerics.averaging
+A_.parameters(2000)
+A_.new_adj()                                       # XPP: Numerics &gt; Averaging &gt; New adj
+adj = m.data
+fig, ax = plt.subplots(figsize=(7, 4))
+for dv in (0.1, 0.5):
+    th_new = phase_of(net_fhn, on_cycle + [dv, 0], T, tc0)
+    dth = (th_new - ths + 0.5) % 1 - 0.5
+    ax.plot(ths, dth / dv, &quot;o-&quot;, ms=3, label=f&quot;kick Δv = {dv}: Δθ / Δv&quot;)
+ax.plot(adj.t / T, adj[&quot;v&quot;] / T, &quot;k--&quot;, label=&quot;adjoint Z_v / T (infinitesimal PRC)&quot;)
+ax.axhline(0, color=&quot;0.7&quot;, lw=0.8)
+ax.set(xlabel=&quot;phase θ at which the kick arrives&quot;, ylabel=&quot;phase shift per unit kick&quot;,
+       title=&quot;FHN phase response curve&quot;)
+ax.legend(fontsize=8)
+plt.show()</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb1_4.png" alt="output figure">
+<div class="cell-md doc"><p>Small kicks follow the adjoint curve; a large kick lands on an
+isochron far from the cycle, where the isochrons bend, and the response
+deviates. <strong>To know the effect of large kicks you need the
+isochrons far from the cycle: global isochrons.</strong> That is what
+Osinga &amp; Moehlis compute.</p>
+<h2 id="a6.-near-the-cycle-an-isochron-is-a-straight-line">A6. Near the
+cycle, an isochron is a straight line</h2>
+<p>Close to γ, the isochron I(γ) is almost a straight segment. Its
+direction n_s is perpendicular to the adjoint vector Z (the gradient of
+the phase). Below: the isochron θ = 0.25 from the phase map, and the
+straight line through γ(0.25) perpendicular to Z. This straight piece,
+of half-length η, is where the continuation method starts (stage
+02).</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [8] &middot; 15 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre><pre><code class="language-python">th0 = 0.25
+g = np.array([np.interp(th0 * T, cyc.t, cyc[&quot;v&quot;]), np.interp(th0 * T, cyc.t, cyc[&quot;w&quot;])])
+Z = np.array([np.interp(th0 * T, adj.t, adj[&quot;v&quot;]), np.interp(th0 * T, adj.t, adj[&quot;w&quot;])])
+ns = np.array([Z[1], -Z[0]]) / np.hypot(*Z)
+fig, ax = plt.subplots(figsize=(6, 4.5))
+ax.contour(VG, WG, TH, [th0], colors=&quot;C3&quot;, linewidths=2)
+ax.plot(cyc[&quot;v&quot;], cyc[&quot;w&quot;], color=&quot;0.6&quot;, lw=3)
+s = np.linspace(-0.6, 0.6, 2)
+ax.plot(g[0] + s * ns[0], g[1] + s * ns[1], &quot;k--&quot;, label=&quot;straight line through γ, perpendicular to Z&quot;)
+ax.quiver(*g, *(Z / np.hypot(*Z) * 0.4), color=&quot;C0&quot;, angles=&quot;xy&quot;, scale_units=&quot;xy&quot;, scale=1, label=&quot;Z (adjoint)&quot;)
+ax.plot(*g, &quot;ko&quot;)
+ax.set(xlim=(g[0] - 1, g[0] + 1), ylim=(g[1] - 0.7, g[1] + 0.7), xlabel=&quot;v&quot;, ylabel=&quot;w&quot;,
+       title=&quot;Isochron 0.25 (red) and its straight approximation&quot;)
+ax.legend(fontsize=8)
+plt.show()</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb1_5.png" alt="output figure">
+<div class="cell-md doc"><h1 id="part-b.-the-reduced-hodgkin-huxley-model">Part B. The reduced
+Hodgkin-Huxley model</h1>
+<p>Now the same steps for the model of Osinga &amp; Moehlis: voltage V
+and potassium gate n (the paper’s eq. 4.1). It is also a relaxation
+oscillator, but with a much stronger separation of time scales than FHN.
+The <code>.ode</code> file:</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [9] &middot; 13 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre><pre><code class="language-python">FUN = [(&quot;am(v)&quot;, &quot;0.1*(v+40)/(1-exp(-(v+40)/10))&quot;), (&quot;bm(v)&quot;, &quot;4*exp(-(v+65)/18)&quot;),
+       (&quot;an(v)&quot;, &quot;0.01*(v+55)/(1-exp(-(v+55)/10))&quot;), (&quot;bn(v)&quot;, &quot;0.125*exp(-(v+65)/80)&quot;),
+       (&quot;minf(v)&quot;, &quot;am(v)/(am(v)+bm(v))&quot;)]
+HH_RHS = {&quot;v&quot;: &quot;iapp-gna*minf(v)^3*(0.8-n)*(v-ena)-gk*n^4*(v-ek)-gl*(v-el)&quot;,
+          &quot;n&quot;: &quot;an(v)*(1-n)-bn(v)*n&quot;}
+HH_PARS = dict(iapp=10, gna=120, gk=36, gl=0.3, ena=50, ek=-77, el=-54.4)
+hb = ModelBuilder(&quot;reduced_hh&quot;)
+for sig, expr in FUN:
+    hb.function(sig, expr)
+hb = (hb.ode(&quot;v&quot;, HH_RHS[&quot;v&quot;]).ode(&quot;n&quot;, HH_RHS[&quot;n&quot;]).parameter(**HH_PARS).initial(v=-60, n=0.3)
+      .option(total=300, dt=0.01, meth=&quot;rk4&quot;, bound=1e6, maxstor=200000))
+print(hb.render())
+h = hb.load(WORK / &quot;reduced_hh.ode&quot;)</code></pre></div></div>
+<div class="cb out"><pre>am(v)=0.1*(v+40)/(1-exp(-(v+40)/10))
+bm(v)=4*exp(-(v+65)/18)
+an(v)=0.01*(v+55)/(1-exp(-(v+55)/10))
+bn(v)=0.125*exp(-(v+65)/80)
+minf(v)=am(v)/(am(v)+bm(v))
+v&#x27;=iapp-gna*minf(v)^3*(0.8-n)*(v-ena)-gk*n^4*(v-ek)-gl*(v-el)
+n&#x27;=an(v)*(1-n)-bn(v)*n
+par iapp=10,gna=120,gk=36,gl=0.3,ena=50,ek=-77,el=-54.4
+init v=-60,n=0.3
+@ total=300,dt=0.01,meth=rungekutta,bound=1000000.0,maxstor=200000
+done
+
+</pre></div>
+<div class="cell-md doc"><h2 id="b1.-phase-on-the-cycle">B1. Phase on the cycle</h2>
+</div>
+<div class="cb"><div class="cb-head"><span>In [10] &middot; 24 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre><pre><code class="language-python">h.run()
+h.buttons.xi_vs_t(&quot;v&quot;)
+h.buttons.initialconds.periodic()
+Th = h.numerics[&quot;total&quot;]
+hc = h.run(keep=False, total=Th, dt=0.001)
+k0 = int(np.argmax(hc[&quot;v&quot;]))
+g0h = np.array([hc[&quot;v&quot;][k0], hc[&quot;n&quot;][k0]])
+h.set(v=g0h[0], n=g0h[1])
+hc = h.run(keep=False, total=Th, dt=0.001)
+eqh = h.equilibrium({&quot;v&quot;: -60, &quot;n&quot;: 0.4})
+xh = np.array([eqh.x[&quot;V&quot;], eqh.x[&quot;N&quot;]])
+print(f&quot;T = {Th:.4f} (paper 11.8463); gamma0 = ({g0h[0]:.3f}, {g0h[1]:.4f}); x* = ({xh[0]:.3f}, {xh[1]:.4f})&quot;)
+
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4))
+a1.plot(hc.t / Th, hc[&quot;v&quot;], color=&quot;k&quot;)
+a1.set(xlabel=&quot;t / T&quot;, ylabel=&quot;V&quot;, title=&quot;One period: a fast spike, then a slow recovery&quot;)
+a2.plot(hc[&quot;v&quot;], hc[&quot;n&quot;], color=&quot;0.6&quot;, lw=3)
+for th in np.arange(0, 1, 0.1):
+    j = int(th * (len(hc.t) - 1))
+    a2.plot(hc[&quot;v&quot;][j], hc[&quot;n&quot;][j], &quot;o&quot;, color=plt.cm.hsv(th), ms=8)
+    a2.annotate(f&quot;{th:.1f}&quot;, (hc[&quot;v&quot;][j], hc[&quot;n&quot;][j]), xytext=(6, 4), textcoords=&quot;offset points&quot;)
+a2.plot(*xh, &quot;x&quot;, color=&quot;k&quot;, ms=9)
+a2.set(xlabel=&quot;V&quot;, ylabel=&quot;n&quot;, title=&quot;Phase marks every 0.1: most of them on the left branch&quot;)
+plt.tight_layout(); plt.show()</code></pre></div></div>
+<div class="cb out"><pre>T = 11.8463 (paper 11.8463); gamma0 = (44.706, 0.4597); x* = (-59.604, 0.4026)
+</pre></div>
+<img class="cell-img" loading="lazy" src="nb/nb1_6.png" alt="output figure">
+<div class="cell-md doc"><p>Phases 0.1 to 0.9 are almost all on the slow left branch: the spike
+(the right half of the picture) takes only about a tenth of the
+period.</p>
+<h2 id="b2b3.-the-phase-map-and-the-isochrons">B2–B3. The phase map and
+the isochrons</h2>
+<p>Same method as A3 (a network of copies, phase from spike times with V
+crossing −20).</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [11] &middot; 9 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9</pre><pre><code class="language-python">net_hh = network(&quot;hh_net&quot;, FUN, HH_RHS, HH_PARS, dict(meth=&quot;rk4&quot;, dt=0.01, bound=1e6))
+h.set(v=g0h[0], n=g0h[1])
+r = h.run(keep=False, total=3 * Th, dt=0.01)
+tc0h = upcross(r.t, r[&quot;v&quot;], -20)[0]
+vh, nh = np.linspace(-90, 52, 101), np.linspace(0.3, 0.8, 81)
+VH, NH = np.meshgrid(vh, nh)
+gh = np.c_[VH.ravel(), NH.ravel()]
+THH = np.concatenate([phase_of(net_hh, gh[i:i + 1000], Th, tc0h, var=(&quot;v&quot;, &quot;n&quot;), thr=-20)
+                      for i in tqdm(range(0, len(gh), 1000), desc=&quot;reduced HH phase map&quot;)]).reshape(VH.shape)</code></pre></div></div>
+<div class="cb out"><pre>reduced HH phase map:   0%|          | 0/9 [00:00&lt;?, ?it/s]</pre></div>
+<div class="cell-md doc"><p><strong>The reduced HH phase map</strong> (from
+<code>make_isochron_figures.py</code>): isochrons θ = 0, 0.1, …, 0.9 on
+the colour-coded asymptotic phase, then grid points coloured by phase
+converging onto the cycle.</p>
+<figure>
+<img src="figures/hh_phase_map_isochrons.png"
+alt="Reduced HH: phase map and isochrons" />
+<figcaption aria-hidden="true">Reduced HH: phase map and
+isochrons</figcaption>
+</figure>
+<figure>
+<img src="figures/hh_flow_snapshots.png"
+alt="Reduced HH: points coloured by asymptotic phase converge onto the cycle" />
+<figcaption aria-hidden="true">Reduced HH: points coloured by asymptotic
+phase converge onto the cycle</figcaption>
+</figure>
+</div>
+<div class="cell-md doc"><p>Compare with FHN: * Outside the cycle the isochrons are almost
+<strong>horizontal</strong>: far from Γ the fast V motion dominates, so
+the phase is set mostly by n. * Inside the cycle the phase map is split
+by a sharp boundary along the middle branch of the V-nullcline: just
+left of it the phase is about 0.3, just right of it about 0. <strong>All
+the other phases are squeezed into this thin strip</strong>, thinner
+than any grid can resolve. Points on either side of the strip either
+jump left or fire a spike.</p>
+<h2 id="b4.-why-this-is-hard">B4. Why this is hard</h2>
+<p>Zoom into the strip: the phase jumps from one value to another across
+a tiny distance.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [12] &middot; 8 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8</pre><pre><code class="language-python">Vline = np.linspace(-55, -45, 200)
+pts = np.c_[Vline, np.full_like(Vline, 0.5)]
+th_line = phase_of(net_hh, pts, Th, tc0h, var=(&quot;v&quot;, &quot;n&quot;), thr=-20)
+fig, ax = plt.subplots(figsize=(7, 3.5))
+ax.plot(Vline, (th_line + 0.5) % 1 - 0.5, &quot;.&quot;, ms=4)   # phase shown in [-0.5, 0.5): 0.99 is -0.01
+ax.set(xlabel=&quot;V (n = 0.5)&quot;, ylabel=&quot;asymptotic phase (−0.5 to 0.5)&quot;,
+       title=&quot;Across the strip the phase jumps from about 0.3 to 0&quot;)
+plt.show()</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb1_7.png" alt="output figure">
+<div class="cell-md doc"><p>Even with 200 points over 10 mV the phase jumps from about 0.3 to
+about 0 between two neighbouring points (near V = −50.4). Making the
+grid finer does not help: the strip is exponentially thin, so the
+isochrons inside it cannot be drawn from a phase map, and they cannot be
+drawn by integrating backward either (the backward flow stretches
+distances by about 10^20 per period). Seeing them needs a different
+method: the <strong>continuation of orbit segments</strong> of Osinga
+&amp; Moehlis, which is stage 02.</p>
+<h2 id="summary">Summary</h2>
+<ul>
+<li><strong>Phase on the cycle</strong>: θ = t/T, a clock.</li>
+<li><strong>Asymptotic phase</strong> of any point: the phase of the
+cycle point it ends up in step with; measured by comparing spike times
+after the transient.</li>
+<li><strong>Isochron</strong> I(γ): all points with γ’s asymptotic
+phase; the contour lines of the phase map. Points on one isochron move
+together and converge onto one moving point.</li>
+<li><strong>Phaseless set</strong>: points that never reach the cycle
+(the unstable equilibrium); every isochron ends there.</li>
+<li><strong>Why</strong>: a kick moves the state across isochrons; the
+phase response curve is read off them. Near the cycle they are straight
+lines ⟂ the adjoint.</li>
+<li><strong>Reduced HH</strong>: all phases are packed into a thin strip
+along the repelling middle branch; brute force cannot resolve it, so
+stage 02 uses continuation.</li>
+</ul>
+</div>
+</div>
+</main>
+<footer><div class="wrap">
+  <p><b style="color:var(--fg)">notebook</b>, a guided reading of H. M. Osinga and J. Moehlis, <i>Continuation-based computation of global isochrons</i>, SIAM J. Appl. Dyn. Syst. 9 (2010) 1201&ndash;1228
+     (<a href="https://sites.me.ucsb.edu/~moehlis/moehlis_papers/isochrons.pdf" target="_blank" rel="noopener">the paper</a>).
+     Every simulation is computed by Bard Ermentrout's
+     <a href="https://sites.pitt.edu/~phase/bard/bardware/xpp/xpp.html" target="_blank" rel="noopener">XPPAUT</a>
+     through <a href="https://zetaone.github.io/pyauto-xpp/">pyauto-xpp</a>.</p>
+  <p>Made by Jeevan Kumar Gochhayat (<a href="https://github.com/ZetaOne">github.com/ZetaOne</a>) &middot;
+     <a href="https://zetaone.github.io/pyauto-xpp/">pyauto-xpp</a> &middot; <a href="https://zetaone.github.io/XPPAUT-Web/">XPPAUT-Web</a> &middot; <a href="https://github.com/ZetaOne/notebook">Source of this site</a></p>
+</div></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha512-AKaNmg8COK0zEbjTdMHJAPJ0z6VeNqvRvH4/d5M4sHJbQQUToMBtodq4HaV4fa+WV2UTfoperElm66c9/8cKmQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha512-whYhDwtTmlC/NpZlCr6PSsAaLOrfjVg/iXAnC4H/dtiHawpShhT2SlIMbpIhT/IL/NrpdMm+Hq2C13+VKpHTYw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+(function () {
+  const D = window.PYX_DISPLAY, root = document.documentElement, $ = id => document.getElementById(id);
+  const THEMES = [{"id": "system", "name": "System (light/dark)", "swatch": ["#ffffff", "#5c6670", "#222326", "#2a3038"]}, {"id": "light", "name": "Light", "swatch": ["#ffffff", "#e6e6e1", "#5c6670", "#2f5d8a"]}, {"id": "dark", "name": "Dark", "swatch": ["#222326", "#34363a", "#2a3038", "#4b7fb3"]}, {"id": "midnight", "name": "Midnight Blue", "swatch": ["#101d36", "#1c3158", "#14274a", "#3d7bd9"]}, {"id": "solarized-light", "name": "Solarized Light", "swatch": ["#fdf6e3", "#eee8d5", "#586e75", "#268bd2"]}, {"id": "solarized-dark", "name": "Solarized Dark", "swatch": ["#002b36", "#073642", "#0a3a47", "#268bd2"]}, {"id": "nord", "name": "Nord", "swatch": ["#3b4252", "#4c566a", "#434c5e", "#5e81ac"]}, {"id": "dracula", "name": "Dracula", "swatch": ["#282a36", "#44475a", "#343746", "#bd93f9"]}, {"id": "sepia", "name": "Sepia", "swatch": ["#faf4e6", "#ebdfc4", "#7a6344", "#8b5a2b"]}, {"id": "contrast", "name": "High Contrast", "swatch": ["#000000", "#ffffff", "#000000", "#ffff00"]}, {"id": "funky1", "name": "Funky 1 (Fairy Floss)", "swatch": ["#5a5475", "#ffb8d1", "#c2ffdf", "#c5a3ff"]}, {"id": "funky2", "name": "Funky 2 (Night Owl)", "swatch": ["#011627", "#82aaff", "#c792ea", "#addb67"]}, {"id": "funky3", "name": "Funky 3 (Synthwave)", "swatch": ["#241b2f", "#ff7edb", "#36f9f6", "#fede5d"]}], FONTS = [["system", "System (default)", "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"], ["serif", "Serif (Charter, Georgia)", "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif"], ["atkinson", "Atkinson Hyperlegible", "'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"], ["lexend", "Lexend", "'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"]];
+  const store = {
+    get(k) { try { return localStorage.getItem(k) } catch (e) { return null } },
+    set(k, v) { try { localStorage.setItem(k, v) } catch (e) {} },
+  };
+  const changed = () => document.dispatchEvent(new CustomEvent('pyx-display'));
+  const check = (box, key, v) => { for (const b of box.querySelectorAll('button')) b.setAttribute('aria-checked', String(b.dataset[key] === v)) };
+  // the code colours follow the theme: VS Code Dark+ on dark themes, Light+ on light ones
+  function setCode(scheme) {
+    const dark = D.theme === 'system' ? matchMedia('(prefers-color-scheme: dark)').matches : D.DARK[D.theme];
+    root.dataset.code = scheme || (dark ? 'dark' : 'light');
+    for (const l of document.querySelectorAll('link[data-code]')) l.media = l.dataset.code === root.dataset.code ? 'all' : 'not all';
+  }
+  function applyTheme(id) {
+    D.theme = id;
+    if (id === 'system') delete root.dataset.theme; else root.dataset.theme = id;
+    check($('themelist'), 'theme', id);
+    setCode();
+    // the phone's status bar takes the toolbar's colour
+    const bar = getComputedStyle(root).getPropertyValue('--bar').trim(), meta = document.querySelector('meta[name="theme-color"]');
+    if (bar && meta) meta.setAttribute('content', bar);
+    changed();
+  }
+  function applySize(z) { D.size = z; root.dataset.textsize = z; check($('sizelist'), 'size', z); changed() }
+  function applyFont(f) {
+    D.font = f; root.dataset.font = f; check($('fontlist'), 'font', f);
+    // a web font is downloaded only when it is chosen
+    if (D.FONTS[f] && !$('webfont-' + f)) {
+      const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = D.FONTS[f]; l.id = 'webfont-' + f;
+      l.onload = changed; document.head.append(l);
+    }
+    if (document.fonts) document.fonts.ready.then(changed);
+    changed();
+  }
+  window.pyxSetCode = setCode;
+  const button = (box, attrs, html, onclick) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('role', 'radio');
+    for (const k in attrs) b.dataset[k] = attrs[k];
+    b.innerHTML = html; b.addEventListener('click', onclick); box.append(b); return b;
+  };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  for (const z of D.SIZES) {
+    const b = button($('sizelist'), { size: z }, '<b style="font-size:' + (0.95 * z / 100) + 'rem">A</b><small>' + z + '%</small>',
+      () => { applySize(z); store.set('pyauto-xpp-textsize', z) });
+    b.setAttribute('aria-label', 'Text size ' + z + '%');
+  }
+  for (const [id, name, stack] of FONTS)
+    button($('fontlist'), { font: id }, '<span style="font-family:' + esc(stack) + '">' + esc(name) + '</span>' +
+      (D.FONTS[id] ? '<small>web font</small>' : ''), () => { applyFont(id); store.set('pyauto-xpp-font', id) });
+  for (const t of THEMES)
+    button($('themelist'), { theme: t.id }, '<span class="swatch">' + t.swatch.map(c => '<i style="background:' + c + '"></i>').join('') +
+      '</span>' + esc(t.name), () => { applyTheme(t.id); store.set('pyauto-xpp-theme', t.id); closeMenus(true) });
+  applyTheme(D.theme); applySize(D.size); applyFont(D.font);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => applyTheme(D.theme));
+  // printing: light code colours on white paper
+  addEventListener('beforeprint', () => setCode('light'));
+  addEventListener('afterprint', () => setCode());
+
+  // ---- toolbar menus: Esc or a click elsewhere closes them; arrows move inside --
+  const menus = () => [...document.querySelectorAll('header details')];
+  function closeMenus(refocus) {
+    for (const d of menus()) if (d.open) { d.open = false; if (refocus) d.querySelector('summary').focus() }
+  }
+  for (const d of menus()) {
+    d.addEventListener('toggle', () => {
+      if (!d.open) return;
+      for (const o of menus()) if (o !== d) o.open = false;
+      const items = [...d.querySelectorAll('.panel button, .panel a')];
+      (items.find(b => b.getAttribute('aria-checked') === 'true') || items[0])?.focus();
+    });
+    d.addEventListener('keydown', e => {
+      const items = [...d.querySelectorAll('.panel button, .panel a')], i = items.indexOf(document.activeElement);
+      if (!d.open || i < 0) return;
+      const go = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key];
+      if (go === undefined) return;
+      e.preventDefault(); items[(go + items.length) % items.length].focus();
+    });
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && menus().some(d => d.open)) { e.preventDefault(); closeMenus(true) } });
+  document.addEventListener('pointerdown', e => { for (const d of menus()) if (d.open && !d.contains(e.target)) d.open = false });
+})();
+</script>
+<script>
+if (window.Prism && Prism.languages) {
+  Prism.languages.ode = {
+    'after-done': { pattern: /(^done[ \t]*\n)[\s\S]*/m, lookbehind: true, alias: 'comment' },
+    comment: [{ pattern: /(^|\s)#.*/m, lookbehind: true }, { pattern: /^\s*".*/m }],
+    keyword: { pattern: /^(\s*)(?:par(?:am)?|p|init|i|aux|number|num|done|set|global|table|wiener|markov|bdry|volt|special|only|export|options|load|keys|autokeys|ans|auto|try|else|end|for|shot|quit|msg|speed)\b|^\s*@/m, lookbehind: true },
+    property: { pattern: /^(\s*)(?:\w+'|d\w+\/dt|\w+\(t\+dt\))(?=\s*=)/m, lookbehind: true },
+    function: /\b\w+(?=\()/,
+    number: /(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[+-]?\d+)?\b/i,
+    operator: /[-+*\/^=<>!]/,
+    punctuation: /[(){},;\[\]]/,
+  };
+  try { Prism.highlightAll() } catch (e) {}
+}
+for (const b of document.querySelectorAll('.cb-copy')) b.addEventListener('click', async () => {
+  const t = b.closest('.cb').querySelector('pre:not(.ln) code').textContent;
+  try { await navigator.clipboard.writeText(t); b.textContent = 'Copied' } catch (e) { b.textContent = 'Select and copy' }
+  setTimeout(() => b.textContent = 'Copy', 1500);
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script><script>renderMathInElement(document.querySelector("main"),{delimiters:[{left:"$$",right:"$$",display:true},{left:"\\[",right:"\\]",display:true},{left:"\\(",right:"\\)",display:false},{left:"$",right:"$",display:false}],ignoredTags:["script","noscript","style","textarea","pre","code"],throwOnError:false})</script>
+
+</body></html>

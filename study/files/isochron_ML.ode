@@ -1,0 +1,143 @@
+# isochron_ML.ode -- isochrons of the Morris-Lecar oscillator, in XPPAUT alone (no BVP)
+#
+# ======================================================================================
+# THE METHOD
+# ======================================================================================
+# Γ          = the stable limit cycle;  T = its period;  x* = the equilibrium inside Γ
+# phase 0    = gamma0, the point of Γ with the largest v
+# clock      = theta = t/T (mod 1) for a state on Γ that starts at gamma0
+# clock reading (asymptotic phase) of any state x0:
+#     integrate x0 until it has settled on Γ
+#     s     = time of an upward crossing of v = thr (after settling)
+#     tc0   = time of the first upward crossing of thr from gamma0
+#     theta(x0) = (tc0 - s)/T  mod 1
+#     (x0 then keeps step with the point of Γ at phase theta(x0))
+# isochron of phase th = all states with clock reading th
+#
+# This file integrates three things side by side:
+#   A. the "γ copy"   (vg, wg): a state on Γ; it waits at gamma0, then starts so that
+#                     its phase is ths + t/T              -> the clock, and a shadow
+#   B. the "test copy" (v, w): starts at (px, py), gets a kick dk in v at time thk*T,
+#                     aux theta = its clock reading       -> clock reading, PRC, phase slices
+#   C. the "backward copy" (vb, wb): runs BACKWARD in time from a point very close to
+#                     gamma0 on the straight isochron there, and stops after (k - th) T
+#                                                         -> a point of the isochron th
+#     why C works: near Γ the isochron of phase 0 through gamma0 is a short straight line
+#     (direction (ev, ew), perpendicular to the adjoint Z at gamma0). The flow carries
+#     isochron a in time t onto isochron a + t/T. Backward by (k - th) T it carries the
+#     isochron 0 onto the isochron -(k - th) = th (mod 1), and backward the points spread
+#     out from Γ, so the tiny line becomes the whole isochron.
+#
+# THE ONE TRICK used below: Initialconds > Range over a parameter, with
+#     Reset storage = N, a transient (Numerics > Transient) that skips everything except
+#     the settled end of each run, and the curve drawn as points (lt <= 0)
+#   -> each run leaves ONE dot; the dots of all runs make the picture.
+#
+# ======================================================================================
+# EXPERIMENTS (in the XPP window)
+# ======================================================================================
+# 0. Γ, T, gamma0, thr, tc0 (already filled in below; to find them yourself):
+#      Initialconds > Go; Initialconds > Last (repeat) -> on Γ
+#      Initialconds > Periodic (uses v)                 -> T
+#      Data viewer: the row with the largest vg         -> gamma0
+#      thr = (min v + max v)/2 on Γ; tc0 = first time vg crosses thr upward from gamma0
+#
+# 1. THE CLOCK.  Viewaxes > 2D: vg, wg.  Initialconds > Go.
+#      Γ is drawn; plot aux clock against t: it runs 0 -> 1 once per period.
+#
+# 2. THE CLOCK READING of x0 = (px, py) = (-40, 0.35).  Initialconds > Go.
+#      Plot aux theta against t: after the transient it is constant = 0.3037.
+#      Graphic stuff > Add curve: v against w (test copy) next to vg, wg (Γ).
+#    the SHADOW: set ths = 0.3037 (the reading); Initialconds > Go;
+#      plot v and vg against t: after the transient the two spike together.
+#      (any other ths: they spike at different times, forever)
+#    x0 = x*: px = -23.0918, py = 0.158053: it never spikes, no clock reading.
+#
+# 3. A PHASE SLICE (clock reading along a line):  py = 0.158 (through x*)
+#      @ trans=680 (8 T), total=690; Graphic stuff > Edit curve: line type 0 (dots)
+#      Initialconds > Range: over px, from -60 to 30, 400 steps, Reset storage N
+#      Viewaxes > 2D: x = px0 (aux), y = theta, 0..1:
+#      all phases 0..1 are squeezed into a tiny interval of px around x*  (pile-up)
+#
+# 4. ISOCHRONS by backward integration (the C copy):
+#      Viewaxes > 2D: vb, wb; x -70..50, y 0..0.65;  Graphic stuff > Edit curve: lt 0
+#      @ trans = k T (= 171 for k = 2), total = trans + 2
+#      Initialconds > Range: over u, from -1 to 1, 400 steps, Reset storage N
+#      -> the dots lie on the isochron th (default 0.25)
+#      change th (0.05, 0.15, ...) and Range again (Reset storage N) -> more isochrons
+#      Graphic stuff > Add curve vg, wg (with trans = 0 run first, or Freeze Γ) for Γ.
+#    near Γ: zoom in close to Γ -> the isochron is a straight line
+#    far from Γ: the isochrons bend, fold around x* and pile up along the line from x* up
+#      to the right (the dots crowd into x*)
+#    keep k = 1 or 2: Γ attracts so strongly (about 10^4 per period) that backward k = 3
+#      throws almost every dot into x* or out of the picture; dec = 12 decades of start
+#      distances s are needed to fill the isochron with dots
+#
+# 5. THE PRC with real kicks.  px = gamma0 v, py = gamma0 w (= 33.3258, 0.305411)
+#      dk = 0.2 (a small kick in v); @ trans=680, total=690; lt 0
+#      Initialconds > Range: over thk, from 0.005 to 0.995, 100 steps, Reset storage N
+#      Viewaxes > 2D: x = kphase (aux), y = dth (aux)  -> PRC: phase shift dth vs kick phase
+#      small dk: dth/dk = the infinitesimal PRC  (Numerics > Averaging > New adj, on Γ alone)
+#    LARGE KICKS: dk = 8, 17, 29 (10, 20, 35 % of the width of Γ): Range again each time
+#      -> far from the infinitesimal PRC; jumps where the kick crosses the pile-up near x*
+# ======================================================================================
+
+# --- the model (one copy = fv, fw; every copy below uses the same functions)
+minf(x)=.5*(1+tanh((x-va1)/va2))
+winf(x)=.5*(1+tanh((x-va3)/va4))
+tauw(x)=1/cosh((x-va3)/(2*va4))
+fv(x,y)=(i-gl*(x-vl)-gca*minf(x)*(x-vca)-gk*y*(x-vk))/c
+fw(x,y)=phi*(winf(x)-y)/tauw(x)
+par i=100,c=20,gl=2,vl=-60,gca=4.4,vca=120,gk=8,vk=-84
+par va1=-1.2,va2=18,va3=2,va4=30,phi=0.04
+
+# --- numbers of Γ (experiment 0)
+par per=85.29064, gv0=33.32581, gw0=0.3054107, thr=-8.505133, tc0=77.87963
+# direction of the straight isochron at gamma0 (perpendicular to Z(gamma0)), and x*
+par ev=79.91397, ew=-0.1163597
+# x* = (-23.09182, 0.1580528)
+
+# --- A. the γ copy: waits at gamma0 until tw, then runs; phase = ths + t/T
+par ths=0
+!tw=mod(1-ths,1)*per
+vg'=fv(vg,wg)*heav(t-tw)
+wg'=fw(vg,wg)*heav(t-tw)
+init vg=33.32581,wg=0.3054107
+aux clock=mod(ths+t/per,1)
+
+# --- B. the test copy: v = px + dv, w = py + dw; kick dk in v at time thk*T
+par px=-40,py=0.35,dk=0,thk=0.3
+!tk=thk*per
+dv'=fv(px+dv,py+dw)
+dw'=fw(px+dv,py+dw)
+tl'=0
+init dv=0,dw=0,tl=0
+global 1 t-tk {dv=dv+dk}
+global 1 px+dv-thr {tl=t}
+aux v=px+dv
+aux w=py+dw
+thx=mod((tc0-tl)/per,1)
+aux theta=thx
+aux dth=mod(thx+.5,1)-.5
+aux px0=px
+aux kphase=thk
+
+# --- C. the backward copy: starts at gamma0 + s (ev, ew), runs backward for (k - th) T
+#        s = sign(u) smax 10^(-dec (1 - |u|)): u in [-1, 1] covers both sides, dec decades
+par th=0.25,k=2,u=0.5,smax=0.02,dec=12
+!tau=(k-th)*per
+!s=sign(u)*smax*10^(-dec*(1-abs(u)))
+#        it also stops when it leaves the box |v| < 200, |w| < 2 (backward, the states
+#        outside Γ run off to infinity)
+vbx=gv0+s*ev+dvb
+wbx=gw0+s*ew+dwb
+go=heav(tau-t)*heav(200-abs(vbx))*heav(2-abs(wbx))
+dvb'=-fv(vbx,wbx)*go
+dwb'=-fw(vbx,wbx)*go
+init dvb=0,dwb=0
+aux vb=vbx
+aux wb=wbx
+
+@ total=690,dt=0.05,meth=rk4,bound=1e9,maxstor=100000
+@ xp=vg,yp=wg,xlo=-70,xhi=50,ylo=0,yhi=0.65
+done

@@ -1,0 +1,11 @@
+am(v)=0.1*(v+40)/(1-exp(-(v+40)/10))
+bm(v)=4*exp(-(v+65)/18)
+an(v)=0.01*(v+55)/(1-exp(-(v+55)/10))
+bn(v)=0.125*exp(-(v+65)/80)
+minf(v)=am(v)/(am(v)+bm(v))
+v'=iapp-gna*minf(v)^3*(0.8-n)*(v-ena)-gk*n^4*(v-ek)-gl*(v-el)
+n'=an(v)*(1-n)-bn(v)*n
+par iapp=10,gna=120,gk=36,gl=0.3,ena=50,ek=-77,el=-54.4
+init v=-60,n=0.3
+@ total=300,dt=0.01,meth=rungekutta,maxstor=200000
+done

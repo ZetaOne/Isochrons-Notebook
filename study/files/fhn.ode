@@ -1,0 +1,6 @@
+v'=v-v^3/3-w+i
+w'=eps*(v+a-b*w)
+par i=0.5,a=0.7,b=0.8,eps=0.08
+init v=-1,w=1
+@ total=400,dt=0.01,meth=rungekutta,maxstor=200000
+done

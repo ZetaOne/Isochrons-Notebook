@@ -1,0 +1,19 @@
+# isochron_bvp.ode -- orbit segments u' = per*F(u) on [0,1] that end on the line
+# through gamma along n_s:  u(1) = gamma + d*n_s   (Osinga & Moehlis 2010)
+am(v)=0.1*(v+40)/(1-exp(-(v+40)/10))
+bm(v)=4*exp(-(v+65)/18)
+an(v)=0.01*(v+55)/(1-exp(-(v+55)/10))
+bn(v)=0.125*exp(-(v+65)/80)
+minf(v)=am(v)/(am(v)+bm(v))
+par d=0,per=11.84627503,gv=44.70638155,gn=0.4597360195,tv=0.9999999906,tn=-0.0001371078909
+par iapp=10,gna=120,gk=36,gl=0.3,ena=50,ek=-77,el=-54.4
+v'=per*(iapp-gna*minf(v)^3*(0.8-n)*(v-ena)-gk*n^4*(v-ek)-gl*(v-el))
+n'=per*(an(v)*(1-n)-bn(v)*n)
+bndry v'-gv-d*tv
+bndry n'-gn-d*tn
+init v=44.70638155,n=0.4597360195
+@ total=1,dt=1e-4,maxstor=400000,meth=rk4,bound=1e4,jac_eps=1e-7,newt_tol=1e-10
+@ ntst=100,nmax=6,npr=100000,ds=1e-5,dsmin=1e-8,dsmax=1e-6,ncol=4
+@ epsl=1e-8,epsu=1e-8,epss=1e-6,parmin=-1,parmax=1,normmax=1e6
+@ autovar=v,autoxmin=-1e-4,autoxmax=1e-4,autoymin=-90,autoymax=52
+done

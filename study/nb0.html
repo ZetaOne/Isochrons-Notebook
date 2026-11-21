@@ -1,0 +1,1849 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notebook 0: Morris–Lecar, an introduction · notebook</title>
+<meta name="description" content="The clock, the clock reading, isochrons straight near the cycle, bending far from it, and what large kicks do.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="../icon-32.png"><link rel="apple-touch-icon" href="../icon-192.png">
+<script>
+  // apply the saved display choices before the page is drawn (no flash of the wrong colours or size);
+  // new visitors get Funky 2 (Night Owl), 100 % text and the system font
+  (function () {
+    var d = document.documentElement, q = {}, DARK = {"system": null, "light": false, "dark": true, "midnight": true, "solarized-light": false, "solarized-dark": true, "nord": true, "dracula": true, "sepia": false, "contrast": true, "funky1": true, "funky2": true, "funky3": true}, FONTS = {"system": "", "serif": "", "atkinson": "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap", "lexend": "https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap"}, SIZES = ["90", "100", "112", "125"];
+    function get(k) { try { return localStorage.getItem(k) } catch (e) { return null } }
+    try { new URLSearchParams(location.search).forEach(function (v, k) { q[k] = v }) } catch (e) {}
+    var t = q.theme || get('pyauto-xpp-theme') || 'light'; if (!(t in DARK)) t = 'light';
+    var z = q.textsize || get('pyauto-xpp-textsize') || '100'; if (SIZES.indexOf(z) < 0) z = '100';
+    var f = q.font || get('pyauto-xpp-font') || 'system'; if (!(f in FONTS)) f = 'system';
+    if (t !== 'system') d.dataset.theme = t;
+    d.dataset.textsize = z; d.dataset.font = f;
+    var dark = t === 'system' ? matchMedia('(prefers-color-scheme: dark)').matches : DARK[t];
+    d.dataset.code = dark ? 'dark' : 'light';
+    var ls = document.querySelectorAll('link[data-code]');
+    for (var i = 0; i < ls.length; i++) ls[i].media = ls[i].dataset.code === d.dataset.code ? 'all' : 'not all';
+    if (FONTS[f]) {
+      var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = FONTS[f]; l.id = 'webfont-' + f;
+      document.head.appendChild(l);
+    }
+    window.PYX_DISPLAY = { theme: t, size: z, font: f, DARK: DARK, FONTS: FONTS, SIZES: SIZES };
+  })();
+</script>
+<link rel="stylesheet" data-code="dark" href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-vsc-dark-plus.min.css" integrity="sha512-ML8rkwYTFNcblPFx+VLgFIT2boa6f8DDP6p6go4+FT0/mJ8DCbCgi6S0UdjtzB3hKCr1zhU+YVB0AHhIloZP8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"><link rel="stylesheet" data-code="light" href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-vs.min.css" integrity="sha512-Jn4HzkCnzA7Bc+lbSQHAMeen0EhSTy71o9yJbXZtQx9VvozKVBV/2zfR3VyuDFIxGvHgbOMMNvb80l+jxFBC1Q==" crossorigin="anonymous" referrerpolicy="no-referrer"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<style>:root {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color-scheme: light dark;
+  --bg: #f4f4f2;
+  --fg: #1d1d1b;
+  --muted: #6b6b66;
+  --bar: #ffffff;
+  --line: #d8d8d2;
+  --desk: #5c6670;
+  --panel-bar: #e6e6e1;
+  --panel-bar-active: #d5dbe3;
+  --hint: #e8ebee;
+  --hint-muted: #c3cad1;
+  --accent: #2f5d8a;
+  --accent-fg: #ffffff;
+  --term-bg: #1b1c1e;
+  --term-head: #26282b;
+  --term-fg: #e4e4e0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #18191b;
+    --fg: #e6e6e3;
+    --muted: #9a9a95;
+    --bar: #222326;
+    --line: #34363a;
+    --desk: #2a3038;
+    --panel-bar: #34363a;
+    --panel-bar-active: #3d4652;
+    --accent: #4b7fb3;
+  }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #18191b;
+  --fg: #e6e6e3;
+  --muted: #9a9a95;
+  --bar: #222326;
+  --line: #34363a;
+  --desk: #2a3038;
+  --panel-bar: #34363a;
+  --panel-bar-active: #3d4652;
+  --accent: #4b7fb3;
+}
+:root[data-theme='midnight'] {
+  color-scheme: dark;
+  --bg: #0b1426;
+  --fg: #dbe4f3;
+  --muted: #8ea0bf;
+  --bar: #101d36;
+  --line: #22355a;
+  --desk: #14274a;
+  --panel-bar: #1c3158;
+  --panel-bar-active: #26437a;
+  --hint: #dbe4f3;
+  --hint-muted: #8ea0bf;
+  --accent: #3d7bd9;
+  --term-bg: #08101f;
+  --term-head: #101d36;
+  --term-fg: #cfdcf2;
+}
+:root[data-theme='solarized-light'] {
+  color-scheme: light;
+  --bg: #fdf6e3;
+  --fg: #586e75;
+  --muted: #93a1a1;
+  --bar: #eee8d5;
+  --line: #d9d2bd;
+  --desk: #586e75;
+  --panel-bar: #eee8d5;
+  --panel-bar-active: #e4dcc3;
+  --hint: #fdf6e3;
+  --hint-muted: #eee8d5;
+  --accent: #268bd2;
+  --term-bg: #002b36;
+  --term-head: #073642;
+  --term-fg: #93a1a1;
+}
+:root[data-theme='solarized-dark'] {
+  color-scheme: dark;
+  --bg: #002b36;
+  --fg: #93a1a1;
+  --muted: #657b83;
+  --bar: #073642;
+  --line: #0f4a59;
+  --desk: #0a3a47;
+  --panel-bar: #073642;
+  --panel-bar-active: #0f4a59;
+  --hint: #93a1a1;
+  --hint-muted: #657b83;
+  --accent: #268bd2;
+  --term-bg: #001f27;
+  --term-head: #073642;
+  --term-fg: #93a1a1;
+}
+:root[data-theme='nord'] {
+  color-scheme: dark;
+  --bg: #2e3440;
+  --fg: #e5e9f0;
+  --muted: #a3acbd;
+  --bar: #3b4252;
+  --line: #4c566a;
+  --desk: #434c5e;
+  --panel-bar: #3b4252;
+  --panel-bar-active: #4c566a;
+  --hint: #eceff4;
+  --hint-muted: #d8dee9;
+  --accent: #5e81ac;
+  --term-bg: #242933;
+  --term-head: #2e3440;
+  --term-fg: #d8dee9;
+}
+:root[data-theme='dracula'] {
+  color-scheme: dark;
+  --bg: #21222c;
+  --fg: #f8f8f2;
+  --muted: #a4a7c4;
+  --bar: #282a36;
+  --line: #44475a;
+  --desk: #343746;
+  --panel-bar: #44475a;
+  --panel-bar-active: #6272a4;
+  --hint: #f8f8f2;
+  --hint-muted: #bd93f9;
+  --accent: #bd93f9;
+  --accent-fg: #21222c;
+  --term-bg: #191a21;
+  --term-head: #282a36;
+  --term-fg: #f8f8f2;
+}
+:root[data-theme='sepia'] {
+  color-scheme: light;
+  --bg: #f4ecd8;
+  --fg: #4b3b2a;
+  --muted: #8a7558;
+  --bar: #faf4e6;
+  --line: #ddcfb0;
+  --desk: #7a6344;
+  --panel-bar: #ebdfc4;
+  --panel-bar-active: #dccaa3;
+  --hint: #faf4e6;
+  --hint-muted: #f1e6cc;
+  --accent: #8b5a2b;
+  --term-bg: #2b2117;
+  --term-head: #3a2d20;
+  --term-fg: #eadcc3;
+}
+:root[data-theme='contrast'] {
+  color-scheme: dark;
+  --bg: #000000;
+  --fg: #ffffff;
+  --muted: #e0e0e0;
+  --bar: #000000;
+  --line: #ffffff;
+  --desk: #000000;
+  --panel-bar: #000000;
+  --panel-bar-active: #1a1a1a;
+  --hint: #ffffff;
+  --hint-muted: #ffff00;
+  --accent: #ffff00;
+  --accent-fg: #000000;
+  --term-bg: #000000;
+  --term-head: #000000;
+  --term-fg: #ffffff;
+}
+/* Fairy Floss, github.com/sailorhg/fairyfloss (MIT): palette on the page around XPP, with a glow behind the windows */
+:root[data-theme='funky1'] {
+  color-scheme: dark;
+  --bg: #4a4466;
+  --fg: #f8f8f2;
+  --muted: #cbc4e6;
+  --bar: #5a5475;
+  --line: #716799;
+  --desk: radial-gradient(circle at 12% 18%, #ffb8d155 0, transparent 42%),
+    radial-gradient(circle at 88% 28%, #c2ffdf50 0, transparent 42%),
+    radial-gradient(circle at 50% 100%, #c5a3ff48 0, transparent 50%),
+    #5a5475;
+  --panel-bar: #716799;
+  --panel-bar-active: #8077a8;
+  --hint: #f8f8f2;
+  --hint-muted: #fff352;
+  --accent: #ffb8d1;
+  --accent-fg: #3f3a56;
+  --term-bg: #3f3a56;
+  --term-head: #4a4466;
+  --term-fg: #f8f8f2;
+  --stripe: linear-gradient(90deg, #ffb8d1, #c5a3ff, #c2ffdf, #fff352, #ff857f);
+}
+/* Night Owl, github.com/sdras/night-owl-vscode-theme (MIT): palette on the page around XPP, with a glow behind the windows */
+:root[data-theme='funky2'] {
+  color-scheme: dark;
+  --bg: #01111d;
+  --fg: #d6deeb;
+  --muted: #7e97ac;
+  --bar: #011627;
+  --line: #1d3b53;
+  --desk: radial-gradient(circle at 12% 18%, #82aaff55 0, transparent 42%),
+    radial-gradient(circle at 88% 28%, #c792ea50 0, transparent 42%),
+    radial-gradient(circle at 50% 100%, #addb6748 0, transparent 50%),
+    #011627;
+  --panel-bar: #0b2942;
+  --panel-bar-active: #1d3b53;
+  --hint: #d6deeb;
+  --hint-muted: #7fdbca;
+  --accent: #82aaff;
+  --accent-fg: #011627;
+  --term-bg: #010e1a;
+  --term-head: #01111d;
+  --term-fg: #d6deeb;
+  --stripe: linear-gradient(90deg, #82aaff, #c792ea, #7fdbca, #addb67, #f78c6c);
+}
+/* Synthwave '84, github.com/robb0wen/synthwave-vscode (MIT): palette on the page around XPP, with a glow behind the windows */
+:root[data-theme='funky3'] {
+  color-scheme: dark;
+  --bg: #1e1a2b;
+  --fg: #ffffff;
+  --muted: #b6b1d0;
+  --bar: #241b2f;
+  --line: #463465;
+  --desk: radial-gradient(circle at 12% 18%, #ff7edb55 0, transparent 42%),
+    radial-gradient(circle at 88% 28%, #36f9f650 0, transparent 42%),
+    radial-gradient(circle at 50% 100%, #fede5d48 0, transparent 50%),
+    #262335;
+  --panel-bar: #34294f;
+  --panel-bar-active: #463465;
+  --hint: #ffffff;
+  --hint-muted: #fede5d;
+  --accent: #ff7edb;
+  --accent-fg: #241b2f;
+  --term-bg: #171520;
+  --term-head: #241b2f;
+  --term-fg: #f4eee4;
+  --stripe: linear-gradient(90deg, #ff7edb, #36f9f6, #fede5d, #f97e72, #72f1b8);
+}
+
+/* ---- toolbar and menus (shared by the main page and the manual) ------------- */
+* { box-sizing: border-box }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 40; padding: 8px 12px; background: var(--bar); color: var(--fg); border: 1px solid var(--line); border-radius: 4px }
+.skip:focus { left: 8px }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+.bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 16px; padding: 6px 12px;
+       min-height: 48px; background: var(--bar); border-bottom: 1px solid var(--line); font-size: .875rem }
+/* funky themes: a multi-coloured stripe under the toolbar (as XPPAUT-Web) */
+:root[data-theme^='funky'] .bar { border-bottom: 3px solid transparent; border-image: var(--stripe) 1 }
+.brand { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; font-weight: 600; color: var(--fg); text-decoration: none; white-space: nowrap }
+.brand img { width: 22px; height: 22px; border-radius: 5px; flex: none }
+.right { margin-left: auto; display: flex; align-items: center; gap: 10px }
+.bar details { position: relative }
+.bar summary { list-style: none } .bar summary::-webkit-details-marker { display: none }
+.round { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid var(--line); flex: none;
+       border-radius: 50%; background: var(--bg); color: var(--fg); cursor: pointer }
+.round:hover, details[open] > summary.round { background: var(--panel-bar-active) }
+.panel { position: absolute; z-index: 100; top: calc(100% + 6px); right: 0; display: grid; gap: 2px; min-width: 220px;
+       max-height: calc(100vh - 70px); overflow: auto; padding: 6px; background: var(--bar); border: 1px solid var(--line);
+       border-radius: 6px; box-shadow: 0 6px 20px rgb(0 0 0 / 0.25) }
+.panel button, .panel a { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 8px; border: 0; border-radius: 4px;
+       background: transparent; color: var(--fg); font: inherit; text-align: left; text-decoration: none; cursor: pointer }
+.panel button:hover, .panel a:hover, .panel button[aria-checked='true'] { background: var(--panel-bar-active) }
+.panel .head { padding: 4px 8px 2px; font-size: .75rem; color: var(--muted) }
+.swatch { display: inline-flex; width: 34px; height: 18px; overflow: hidden; border: 1px solid rgb(127 127 127 / 0.5); border-radius: 3px; flex: none }
+.swatch i { flex: 1 }
+@media (pointer: coarse) {
+  .panel button, .panel a { min-height: 44px }
+  .round { width: 40px; height: 40px }
+}
+
+
+/* ---- display: text size and font (see DISPLAY_* in make_site.py) ------------ */
+/* XPPAUT-Web's theme sets 14px on :root; here 1rem is the reader's text size */
+:root { font-size: 100%; --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+        --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif }
+:root[data-textsize='90'] { font-size: 90% }
+:root[data-textsize='112'] { font-size: 112% }
+:root[data-textsize='125'] { font-size: 125% }
+:root[data-font='serif'] { --font-body: Charter, 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif }
+:root[data-font='atkinson'] { --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif }
+:root[data-font='lexend'] { --font-body: 'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif }
+body { font-family: var(--font-body) }
+code, pre, kbd, samp { font-family: var(--font-mono) }
+/* the panel */
+.dpanel { width: min(300px, calc(100vw - 24px)); gap: 0 }
+.dpanel .head { padding: 8px 8px 4px; font-weight: 600 }
+.dpanel .head:first-child { padding-top: 2px }
+.dpanel .grp { display: grid; gap: 2px }
+.dpanel .sep { height: 1px; margin: 6px 2px 0; background: var(--line) }
+.dpanel .seg { grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 0 2px }
+.dpanel .seg button { flex-direction: column; justify-content: center; gap: 0; padding: 4px 0; border: 1px solid var(--line); text-align: center }
+.dpanel .seg button[aria-checked='true'] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent) }
+.dpanel .seg b { line-height: 1.15 }
+.dpanel .seg small { font-size: .6875rem; color: var(--muted) }
+.dpanel .fontlist button[aria-checked='true'], .dpanel .themelist button[aria-checked='true'] { box-shadow: inset 3px 0 0 var(--accent) }
+.dpanel .fontlist span { flex: 1 }
+.dpanel .fontlist small { color: var(--muted); font-size: .75rem; font-family: var(--font-body) }
+
+
+html { scroll-behavior: smooth }
+body { margin: 0; background: var(--bg); color: var(--fg); line-height: 1.55 }
+a { color: var(--accent) }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px }
+.nav { display: flex; gap: 2px }
+.nav a { padding: 8px 10px; border-radius: 6px; color: var(--fg); text-decoration: none }
+.nav a:hover { background: var(--panel-bar-active) }
+.menu { display: none }
+h1, h2, h3 { line-height: 1.2 }
+h2 { font-size: 1.5rem; margin: 2.2rem 0 .4rem }
+.lead { color: var(--muted); margin: 0 0 1rem; max-width: 60rem }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 8px; border: 1px solid var(--accent);
+       background: var(--accent); color: var(--accent-fg); font-weight: 600; text-decoration: none; font-size: .9375rem; cursor: pointer }
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line) }
+.btn.ghost:hover { border-color: var(--accent) }
+.btn small { font-weight: 400; opacity: .8 }
+.tag { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); font-size: .75rem;
+       color: var(--muted); text-decoration: none; white-space: nowrap }
+a.tag:hover { border-color: var(--accent); color: var(--fg) }
+.fig-bg { background: #fff; border-radius: 8px }
+footer { margin-top: 48px; padding: 22px 0 30px; border-top: 1px solid var(--line); background: var(--bar);
+         font-size: .84375rem; color: var(--muted) }
+footer a { color: var(--fg) }
+@media (max-width: 760px) {
+  .nav { display: none }
+  .menu { display: block }
+}
+
+
+:root[data-code='dark'] { --cb-bg: #1e1e1e; --cb-head: #252526; --cb-headfg: #c5c5c5; --cb-line: #3c3c3c; --cb-fg: #d4d4d4; --cb-num: #6e7681 }
+:root[data-code='light'] { --cb-bg: #ffffff; --cb-head: #f3f3f3; --cb-headfg: #5c5c5c; --cb-line: #dcdcdc; --cb-fg: #1f1f1f; --cb-num: #9a9a9a }
+.cb { margin: 1em 0 1.3em; border: 1px solid var(--cb-line); border-radius: 8px; overflow: hidden; background: var(--cb-bg) }
+.cb-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 32px; padding: 0 6px 0 12px;
+       background: var(--cb-head); color: var(--cb-headfg); border-bottom: 1px solid var(--cb-line); font-size: .75rem }
+.cb-head button, .cb-head a { font: inherit; color: inherit; background: transparent; border: 1px solid var(--cb-line); border-radius: 5px;
+       padding: 3px 9px; cursor: pointer; text-decoration: none }
+.cb-body { display: grid; grid-template-columns: auto 1fr; overflow-x: auto }
+.cb pre { margin: 0; padding: 12px 14px; font: .8125rem/1.55 var(--font-mono); background: transparent !important; color: var(--cb-fg);
+       tab-size: 4; overflow: visible }
+.cb pre code { font: inherit; background: transparent !important; text-shadow: none }
+.cb pre.ln { color: var(--cb-num); text-align: right; user-select: none; padding-right: 10px; border-right: 1px solid var(--cb-line) }
+.cb.out { background: color-mix(in srgb, var(--cb-bg) 94%, var(--fg)) }
+.cb.out pre { white-space: pre-wrap }
+.doc { max-width: 52rem }
+.doc img { max-width: 100%; background: #fff; border-radius: 6px }
+.doc table { border-collapse: collapse; margin: 1em 0; font-size: .9375rem }
+.doc th, .doc td { border: 1px solid var(--line); padding: 4px 10px; text-align: left; vertical-align: top }
+.doc code { font-size: .875em; background: color-mix(in srgb, var(--fg) 8%, transparent); padding: 1px 4px; border-radius: 4px }
+.doc pre code { background: transparent; padding: 0 }
+.doc blockquote { margin: 1em 0; padding: .2em 1em; border-left: 3px solid var(--accent); color: var(--muted) }
+.crumbs { font-size: .875rem; color: var(--muted); margin: 18px 0 0 }
+.crumbs a { color: var(--muted) }
+.pagehead h1 { font-size: 1.75rem; margin: .3rem 0 .4rem; font-family: var(--font-mono) }
+.pagehead h1.prose { font-family: inherit }
+.pagehead p { margin: .2rem 0 .6rem; color: var(--muted); max-width: 52rem }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: .6rem 0 }
+.figs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin: 1rem 0 }
+.figs a { display: block; background: #fff; border-radius: 8px; border: 1px solid var(--line); overflow: hidden }
+.figs img { width: 100%; display: block }
+.cell-md { margin: 1.2rem 0 }
+.cell-n { font: .6875rem var(--font-mono); color: var(--muted); margin: 1rem 0 -.6rem }
+.cell-img { max-width: 100%; background: #fff; border-radius: 6px; display: block; margin: .4rem 0 1rem }
+.flist { list-style: none; padding: 0; display: grid; gap: 8px }
+.flist li { display: grid; grid-template-columns: minmax(12rem, auto) 1fr; gap: 4px 14px; padding: 10px 12px; background: var(--bar);
+            border: 1px solid var(--line); border-radius: 8px }
+.flist li a { font-family: var(--font-mono); font-weight: 600 }
+.flist li span { color: var(--muted) }
+@media (max-width: 760px) { .flist li { grid-template-columns: 1fr } }
+</style>
+
+</head><body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar">
+  <a class="brand" href="../index.html"><img src="../icon-192.png" alt="" width="22" height="22">notebook</a>
+  <nav class="nav" aria-label="Sections"><a href="../index.html#book">Book</a><a href="../index.html#chapters">Chapters</a><a href="../index.html#study">Study kit</a><a href="../code/index.html">Code</a><a href="../index.html#highlights">My highlights</a></nav>
+  <div class="right">
+    <details class="display" id="themes">
+      <summary class="round" title="Display: theme, text size, font" aria-label="Display: theme, text size and font">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none"
+          stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+      </summary>
+      <div class="panel dpanel" id="displaypanel" role="group" aria-label="Display">
+        <div class="head" id="dh-size">Text size</div>
+        <div class="grp seg" id="sizelist" role="radiogroup" aria-labelledby="dh-size"></div>
+        <div class="sep"></div>
+        <div class="head" id="dh-font">Font</div>
+        <div class="grp fontlist" id="fontlist" role="radiogroup" aria-labelledby="dh-font"></div>
+        <div class="sep"></div>
+        <div class="head" id="dh-theme">Theme (as XPPAUT-Web)</div>
+        <div class="grp themelist" id="themelist" role="radiogroup" aria-labelledby="dh-theme"></div>
+      </div>
+    </details>
+    <details class="menu"><summary class="round" aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary>
+      <div class="panel" role="menu"><a role="menuitem" href="../index.html#book">Book</a><a role="menuitem" href="../index.html#chapters">Chapters</a><a role="menuitem" href="../index.html#study">Study kit</a><a role="menuitem" href="../code/index.html">Code</a><a role="menuitem" href="../index.html#highlights">My highlights</a><a role="menuitem" href="https://sites.me.ucsb.edu/~moehlis/moehlis_papers/isochrons.pdf" target="_blank" rel="noopener">The paper (PDF)</a></div></details>
+  </div>
+</header>
+<main id="main">
+<div class="wrap">
+<p class="crumbs"><a href="../index.html">Library</a> / <a href="../index.html#study">Study kit</a> / stage_00_ML_isochrons-introduction.ipynb</p>
+<div class="pagehead"><h1 class="prose">Notebook 0: Morris&ndash;Lecar, an introduction</h1><p>The clock, the clock reading, isochrons straight near the cycle, bending far from it, and what large kicks do.</p>
+<div class="row"><a class="tag" href="../notebook.html#ch02">Ch. 2 &middot; A Periodic Orbit Is a Clock</a> <a class="tag" href="../notebook.html#ch04">Ch. 4 &middot; Asymptotic Phase and Isochrons</a> <a class="tag" href="../notebook.html#ch06">Ch. 6 &middot; Phase Response Curves</a></div>
+<div class="row"><a class="btn ghost" href="files/stage_00_ML_isochrons-introduction.ipynb" download>Download stage_00_ML_isochrons-introduction.ipynb</a></div></div>
+<div class="cell-md doc"><h1
+id="isochrons-00.-what-is-an-isochron-the-clock-the-clock-reading-and-large-kicks">Isochrons
+00. What is an isochron? The clock, the clock reading, and large
+kicks</h1>
+<p><a
+href="https://colab.research.google.com/github/ZetaOne/pyauto-xpp/blob/main/isochrons/00_ML_isochrons-introduction.ipynb"><img
+src="https://colab.research.google.com/assets/colab-badge.svg"
+alt="Open in Colab" /></a></p>
+<h2 id="introduction">0. Introduction</h2>
+<blockquote>
+<p>An oscillator that settles onto a stable limit cycle Γ has a clock:
+where it is on Γ. A state that is not on Γ also gets a clock reading,
+its asymptotic phase: wait until it has settled, and read off which
+point of Γ it is now keeping step with. The curves of equal asymptotic
+phase are the isochrons (Winfree 1974). Near Γ they are short straight
+lines, and their directions give the familiar infinitesimal phase
+response curve. Far from Γ they can bend, fold and pile up, and that is
+what decides how an oscillator responds to a large kick.</p>
+</blockquote>
+<p>This notebook takes that paragraph apart, step by step, with the
+Morris–Lecar neuron:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>part</th>
+<th>sentence</th>
+<th>what is computed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>0a</strong></td>
+<td>the clock and the clock reading</td>
+<td>Γ and its period; phase θ = t/T; a state off Γ falling in step with
+one point of Γ; its clock reading (asymptotic phase); the equilibrium,
+which has none</td>
+</tr>
+<tr class="even">
+<td><strong>0b</strong></td>
+<td>isochrons, straight near Γ</td>
+<td>the phase map and its contour lines; states on one isochron moving
+together; near Γ, straight lines perpendicular to the adjoint; the
+infinitesimal PRC, checked with small kicks</td>
+</tr>
+<tr class="odd">
+<td><strong>0c</strong></td>
+<td>far from Γ, and large kicks</td>
+<td>isochrons bending, folding around the equilibrium and piling up;
+where a large kick lands; PRCs for growing kicks</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Another oscillator:</strong> everything is computed from the
+<code>OSC</code> cell below. Replace it (a FitzHugh–Nagumo and a van der
+Pol version are given) and run all cells: every section works the same
+way for the new oscillator.</p>
+<p>The sliders and <em>Compute</em> buttons need a running kernel. Every
+number is computed by XPPAUT 8.2 through pyauto-xpp.</p>
+</div>
+<div class="cell-md doc"><p>Running in Google Colab? This cell installs pyauto-xpp first;
+elsewhere it does nothing.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [1] &middot; 3 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3</pre><pre><code class="language-python">import sys
+if &quot;google.colab&quot; in sys.modules:
+    %pip -q install pyauto-xpp tqdm --find-links https://github.com/ZetaOne/pyauto-xpp/releases/expanded_assets/v0.3.0</code></pre></div></div>
+<div class="cell-md doc"><h2
+id="the-oscillator-the-only-cell-to-change-for-another-oscillator">The
+oscillator (the only cell to change for another oscillator)</h2>
+<p>Everything below reads the model from <code>OSC</code>: two
+variables, their right-hand sides, the parameters and a starting state
+that goes to the limit cycle. The phase 0 of the clock is the maximum of
+the <strong>first</strong> variable, a “spike” is the first variable
+crossing the middle of its range on Γ upward, and kicks are in the first
+variable. To study another oscillator, replace <code>OSC</code>
+(FitzHugh–Nagumo and van der Pol are given, commented out).</p>
+<p>The default is the Morris–Lecar neuron, Rinzel &amp; Ermentrout’s
+parameters with I = 100:</p>
+<p><span class="math display">\[ C\dot V = I - g_L(V-V_L) - g_{Ca}\,
+m_\infty(V)(V-V_{Ca}) - g_K\, w\,(V-V_K), \qquad
+   \dot w = \phi\,\frac{w_\infty(V)-w}{\tau_w(V)} \]</span></p>
+<p>(V1..V4 of the model are called va1..va4: XPP names the copies of v
+in a network V0, V1, …, so a parameter may not be a variable name
+followed by digits.)</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [2] &middot; 24 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre><pre><code class="language-python">OSC = dict(
+    name=&quot;morris_lecar&quot;,
+    variables=(&quot;v&quot;, &quot;w&quot;),                       # (first, second); phase 0 = max of the first
+    units=(&quot;mV&quot;, &quot;&quot;),                           # for axis labels
+    functions=[(&quot;minf(v)&quot;, &quot;0.5*(1+tanh((v-va1)/va2))&quot;), (&quot;winf(v)&quot;, &quot;0.5*(1+tanh((v-va3)/va4))&quot;),
+               (&quot;tauw(v)&quot;, &quot;1/cosh((v-va3)/(2*va4))&quot;)],
+    rhs={&quot;v&quot;: &quot;(i-gl*(v-vl)-gca*minf(v)*(v-vca)-gk*w*(v-vk))/c&quot;,
+         &quot;w&quot;: &quot;phi*(winf(v)-w)/tauw(v)&quot;},
+    parameters=dict(i=100, c=20, gl=2, vl=-60, gca=4.4, vca=120, gk=8, vk=-84,
+                    va1=-1.2, va2=18, va3=2, va4=30, phi=0.04),
+    start=dict(v=-30, w=0.1),                   # a state that goes to the limit cycle
+    dt=0.05,                                    # integration step
+    window=(-70.0, 50.0, 0.0, 0.65),            # optional: (xmin, xmax, ymin, ymax); None = from Γ
+)
+
+# FitzHugh-Nagumo:
+# OSC = dict(name=&quot;fitzhugh_nagumo&quot;, variables=(&quot;v&quot;, &quot;w&quot;), units=(&quot;&quot;, &quot;&quot;), functions=[],
+#            rhs={&quot;v&quot;: &quot;v-v^3/3-w+i&quot;, &quot;w&quot;: &quot;eps*(v+a-b*w)&quot;},
+#            parameters=dict(i=0.5, a=0.7, b=0.8, eps=0.08), start=dict(v=-1, w=1), dt=0.01,
+#            window=None)
+# van der Pol (mu = 2):
+# OSC = dict(name=&quot;van_der_pol&quot;, variables=(&quot;x&quot;, &quot;y&quot;), units=(&quot;&quot;, &quot;&quot;), functions=[],
+#            rhs={&quot;x&quot;: &quot;y&quot;, &quot;y&quot;: &quot;mu*(1-x^2)*y-x&quot;}, parameters=dict(mu=2),
+#            start=dict(x=0.5, y=0), dt=0.005, window=None)</code></pre></div></div>
+<div class="cell-md doc"><h2 id="setup-general-works-for-any-osc">Setup (general: works for any
+<code>OSC</code>)</h2>
+<p>Builds the model in XPPAUT (its <code>.ode</code> file is printed),
+finds Γ, the period T (XPP: <em>Initialconds &gt; Go</em>, then
+<em>Initialconds &gt; Periodic</em>), phase 0 γ0 at the maximum of the
+first variable, the spike threshold, the equilibrium inside Γ, and a
+network of copies of the model to compute many clock readings in one XPP
+run.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [3] &middot; 133 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133</pre><pre><code class="language-python">import hashlib
+import json
+import os
+import re
+import tempfile
+import urllib.request
+from pathlib import Path
+
+import ipywidgets as W
+import matplotlib.pyplot as plt
+import numpy as np
+from IPython.display import display
+from pyxpp.builder import ModelBuilder
+from tqdm.auto import tqdm
+
+WORK, HERE = Path(tempfile.mkdtemp()), Path.cwd()
+X, Y = OSC[&quot;variables&quot;]
+UX, UY = OSC[&quot;units&quot;]
+LX, LY = (f&quot;{X} ({UX})&quot; if UX else X), (f&quot;{Y} ({UY})&quot; if UY else Y)
+DT, NC = OSC[&quot;dt&quot;], 200
+for p in OSC[&quot;parameters&quot;]:                     # a parameter like v1 would clash with the copies of v
+    if re.fullmatch(rf&quot;({X}|{Y})\d+&quot;, p, flags=re.I):
+        raise ValueError(f&quot;rename parameter {p}: XPP uses that name for a copy of a variable&quot;)
+
+mb = ModelBuilder(OSC[&quot;name&quot;])
+for sig, expr in OSC[&quot;functions&quot;]:
+    mb.function(sig, expr)
+mb = (mb.ode(X, OSC[&quot;rhs&quot;][X]).ode(Y, OSC[&quot;rhs&quot;][Y]).parameter(**OSC[&quot;parameters&quot;])
+      .initial(**OSC[&quot;start&quot;]).option(total=20000 * DT, dt=DT, meth=&quot;rk4&quot;, bound=1e6, maxstor=400000))
+print(mb.render())
+m = mb.load(WORK / f&quot;{OSC[&#x27;name&#x27;]}.ode&quot;)
+
+# onto the cycle (long enough to forget the start), then its period
+m.run(keep=False, total=20000 * DT)
+s = m.last_state()
+m.set(**{X: s[X.upper()], Y: s[Y.upper()]})
+m.run()
+m.buttons.xi_vs_t(X)
+m.buttons.initialconds.periodic()              # sets total = T
+T = m.numerics[&quot;total&quot;]
+c0 = m.run(keep=False, total=T, dt=T / 20000)
+k0 = int(np.argmax(c0[X]))
+gamma0 = np.array([c0[X][k0], c0[Y][k0]])       # phase 0: maximum of the first variable
+m.set(**{X: gamma0[0], Y: gamma0[1]})
+c0 = m.run(keep=False, total=T, dt=T / 20000)
+CX, CY, CT = np.asarray(c0[X], float), np.asarray(c0[Y], float), np.asarray(c0.t, float)
+THR = 0.5 * (CX.min() + CX.max())               # spike: first variable crosses this upward
+SX, SY = CX.max() - CX.min(), CY.max() - CY.min()   # scales of Γ, for distances
+if OSC.get(&quot;window&quot;):
+    WIN = tuple(OSC[&quot;window&quot;])
+else:
+    WIN = (CX.min() - 0.4 * SX, CX.max() + 0.4 * SX, CY.min() - 0.4 * SY, CY.max() + 0.4 * SY)
+try:
+    eq = m.equilibrium({X: float(CX.mean()), Y: float(CY.mean())})
+    xstar = np.array([eq.x[X.upper()], eq.x[Y.upper()]])
+except Exception:
+    xstar = None                                 # no equilibrium found inside Γ
+
+
+def gamma(theta):
+    &quot;&quot;&quot;the point of Γ whose clock reads theta&quot;&quot;&quot;
+    s = (theta % 1) * T
+    return np.array([np.interp(s, CT, CX), np.interp(s, CT, CY)])
+
+
+def upcross(t, x, thr=None):
+    &quot;&quot;&quot;times where x crosses the threshold upward: the spikes&quot;&quot;&quot;
+    thr = THR if thr is None else thr
+    i = np.nonzero((x[:-1] &lt; thr) &amp; (x[1:] &gt;= thr))[0]
+    return t[i] + (thr - x[i]) / (x[i + 1] - x[i]) * (t[i + 1] - t[i])
+
+
+m.set(**{X: gamma0[0], Y: gamma0[1]})
+r = m.run(keep=False, total=3 * T, dt=DT)
+t_c0 = upcross(np.asarray(r.t, float), np.asarray(r[X], float))[0]   # the cycle&#x27;s spike after gamma0
+
+# N uncoupled copies of the model in one XPP model (a network): one run, N states
+nb = ModelBuilder(OSC[&quot;name&quot;] + &quot;_network&quot;)
+for sig, expr in OSC[&quot;functions&quot;]:
+    nb.function(sig, expr)
+idx = {k: re.sub(rf&quot;\b{Y}\b&quot;, f&quot;{Y}[j]&quot;, re.sub(rf&quot;\b{X}\b&quot;, f&quot;{X}[j]&quot;, e)) for k, e in OSC[&quot;rhs&quot;].items()}
+net = (nb.ode(f&quot;{X}[0..{NC - 1}]&quot;, idx[X]).ode(f&quot;{Y}[0..{NC - 1}]&quot;, idx[Y])
+       .parameter(**OSC[&quot;parameters&quot;]).option(dt=DT, meth=&quot;rk4&quot;, bound=1e6, maxstor=400000)
+       .load(WORK / f&quot;{OSC[&#x27;name&#x27;]}_network.ode&quot;))
+
+
+def clock_reading(points, periods=8):
+    &quot;&quot;&quot;the asymptotic phase of each state: theta = ((t_c0 - t_s)/T) mod 1, from a spike t_s
+    after the state has settled on Γ (NaN if it has not settled after `periods` periods)&quot;&quot;&quot;
+    pts = np.atleast_2d(np.asarray(points, float))
+    out = np.full(len(pts), np.nan)
+    for s0 in range(0, len(pts), NC):
+        chunk = pts[s0:s0 + NC]
+        ic = {}
+        for j in range(NC):
+            p = chunk[j] if j &lt; len(chunk) else chunk[0]
+            ic[f&quot;{X}{j}&quot;], ic[f&quot;{Y}{j}&quot;] = p[0], p[1]
+        net.ics.update(ic)
+        A = net.run(total=periods * T, trans=(periods - 2.5) * T).array
+        t, XX = A[:, 0], A[:, 1:1 + len(chunk)]
+        for c in range(len(chunk)):
+            s = upcross(t, XX[:, c])
+            if len(s) &gt;= 2 and abs(s[-1] - s[-2] - T) &lt; 1e-3 * T:
+                out[s0 + c] = ((t_c0 - s[-1]) / T) % 1
+    return out
+
+
+def trajectory(x, total):
+    m.set(**{X: x[0], Y: x[1]})
+    tr = m.run(keep=False, total=total, dt=DT)
+    return np.asarray(tr.t, float), np.asarray(tr[X], float), np.asarray(tr[Y], float)
+
+
+def dist(a, b):
+    &quot;&quot;&quot;distance between states, each variable scaled by the size of Γ&quot;&quot;&quot;
+    return np.hypot((np.asarray(a)[..., 0] - np.asarray(b)[..., 0]) / SX,
+                    (np.asarray(a)[..., 1] - np.asarray(b)[..., 1]) / SY)
+
+
+def draw_cycle(ax, marks=False):
+    ax.plot(CX, CY, color=&quot;k&quot;, lw=2.5)
+    if xstar is not None:
+        ax.plot(*xstar, &quot;x&quot;, color=&quot;k&quot;, ms=9)
+    if marks:
+        for th in np.arange(0, 1, 0.05):
+            ax.plot(*gamma(th), &quot;o&quot;, color=plt.cm.hsv(th), ms=5)
+    ax.set(xlim=WIN[:2], ylim=WIN[2:], xlabel=LX, ylabel=LY)
+
+
+INTERACTIVE = not os.environ.get(&quot;ISOCHRON_HEADLESS&quot;)   # False only when built without a browser
+print(f&quot;{OSC[&#x27;name&#x27;]}: period T = {T:.4f}; phase 0 at gamma0 = ({gamma0[0]:.4f}, {gamma0[1]:.4f}); &quot;
+      f&quot;spike threshold {X} = {THR:.4f}&quot; +
+      (f&quot;; equilibrium x* = ({xstar[0]:.4f}, {xstar[1]:.4f})&quot; if xstar is not None else &quot;&quot;))</code></pre></div></div>
+<div class="cb out"><pre>minf(v)=0.5*(1+tanh((v-va1)/va2))
+winf(v)=0.5*(1+tanh((v-va3)/va4))
+tauw(v)=1/cosh((v-va3)/(2*va4))
+v&#x27;=(i-gl*(v-vl)-gca*minf(v)*(v-vca)-gk*w*(v-vk))/c
+w&#x27;=phi*(winf(v)-w)/tauw(v)
+par i=100,c=20,gl=2,vl=-60,gca=4.4,vca=120,gk=8,vk=-84,va1=-1.2,va2=18,va3=2,va4=30,phi=0.04
+init v=-30,w=0.1
+@ total=1000.0,dt=0.05,meth=rungekutta,bound=1000000.0,maxstor=400000
+done
+
+</pre></div>
+<div class="cb out"><pre>morris_lecar: period T = 85.2906; phase 0 at gamma0 = (33.3258, 0.3054); spike threshold v = -8.5051; equilibrium x* = (-23.0918, 0.1581)
+</pre></div>
+<div class="cell-md doc"><h3 id="the-phase-map-the-clock-reading-of-every-state-on-a-grid">The
+phase map: the clock reading of every state on a grid</h3>
+<p>Computed once with <code>clock_reading</code> (a few minutes) and
+stored in <code>data/</code> under a name that depends on the
+oscillator, so changing <code>OSC</code> computes a new map. For the
+default Morris–Lecar model it is downloaded in Colab if published.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [4] &middot; 35 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35</pre><pre><code class="language-python">key = hashlib.sha1(json.dumps(OSC, sort_keys=True, default=str).encode()).hexdigest()[:8]
+MAPFILE = HERE / &quot;data&quot; / f&quot;{OSC[&#x27;name&#x27;]}_phase_map_{key}.npz&quot;
+RAWMAP = f&quot;https://raw.githubusercontent.com/ZetaOne/pyauto-xpp/main/isochrons/data/{MAPFILE.name}&quot;
+if not MAPFILE.exists():
+    MAPFILE.parent.mkdir(exist_ok=True)
+    try:
+        urllib.request.urlretrieve(RAWMAP, MAPFILE)
+    except Exception:
+        VG, WG = np.meshgrid(np.linspace(WIN[0], WIN[1], 121), np.linspace(WIN[2], WIN[3], 91))
+        g = np.c_[VG.ravel(), WG.ravel()]
+        TH = np.concatenate([clock_reading(g[s:s + 1000])
+                             for s in tqdm(range(0, len(g), 1000), desc=&quot;phase map&quot;)]).reshape(VG.shape)
+        np.savez(MAPFILE, V=VG, W=WG, TH=TH)
+d = np.load(MAPFILE)
+VG, WG, TH = d[&quot;V&quot;], d[&quot;W&quot;], d[&quot;TH&quot;]          # grid of the first and second variable, clock reading
+
+
+def no_wrap(F):
+    &quot;&quot;&quot;hide grid points next to a jump &gt; 0.5 (where the reading wraps from 1 to 0)&quot;&quot;&quot;
+    bad = np.zeros(F.shape, bool)
+    dx, dy = np.abs(np.diff(F, axis=1)) &gt; 0.5, np.abs(np.diff(F, axis=0)) &gt; 0.5
+    bad[:, :-1] |= dx; bad[:, 1:] |= dx; bad[:-1, :] |= dy; bad[1:, :] |= dy
+    return np.ma.masked_where(bad | np.isnan(F), F)
+
+
+def isochron(ax, level, **kw):
+    &quot;&quot;&quot;the isochron of clock reading `level`: a contour line of the phase map&quot;&quot;&quot;
+    level = level if level &gt; 0 else 1e-9
+    if 0.25 &lt;= level &lt;= 0.75:
+        return ax.contour(VG, WG, no_wrap(TH), [level], **kw)
+    return ax.contour(VG, WG, no_wrap((TH + 0.5) % 1), [(level + 0.5) % 1], **kw)
+
+
+def phase_background(ax):
+    ax.pcolormesh(VG, WG, TH, cmap=&quot;hsv&quot;, shading=&quot;auto&quot;, vmin=0, vmax=1, alpha=0.45)</code></pre></div></div>
+<div class="cell-md doc"><h3 id="the-adjoint-along-γ">The adjoint along Γ</h3>
+<p>XPP: from γ0, <em>Numerics &gt; Averaging &gt; New adj</em>. Z(t) is
+the gradient of the clock reading at γ(t/T), normalised so that Z·F = 1:
+a small displacement Δx changes the clock reading by about Z·Δx / T.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [5] &middot; 20 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20</pre><pre><code class="language-python">m.set(**{X: gamma0[0], Y: gamma0[1]})
+m.run(keep=False, total=T, dt=T / 20000)
+A_ = m.buttons.numerics.averaging
+A_.parameters(4000)
+A_.new_adj()
+adj = m.data
+ZT, ZX, ZY = np.asarray(adj.t, float), np.asarray(adj[X], float), np.asarray(adj[Y], float)
+
+
+def Z(theta):
+    return np.array([np.interp(theta * T, ZT, ZX), np.interp(theta * T, ZT, ZY)])
+
+
+def isochron_step(theta):
+    &quot;&quot;&quot;one scaled unit along the straight isochron at gamma(theta): perpendicular to Z, with
+    each variable scaled by the size of Γ (SX, SY)&quot;&quot;&quot;
+    z = Z(theta)
+    zs = np.array([z[0] * SX, z[1] * SY])            # the gradient in scaled coordinates
+    ts = np.array([zs[1], -zs[0]]) / np.hypot(*zs)   # unit tangent, scaled coordinates
+    return np.array([SX * ts[0], SY * ts[1]])</code></pre></div></div>
+<div class="cell-md doc"><h2 id="a.-the-clock-and-the-clock-reading-of-any-state">0a. The clock,
+and the clock reading of any state</h2>
+<blockquote>
+<p>An oscillator that settles onto a stable limit cycle Γ has a
+<strong>clock</strong>: where it is on Γ. A state that is not on Γ also
+gets a <strong>clock reading</strong>, its asymptotic phase: wait until
+it has settled, and read off which point of Γ it is now keeping step
+with.</p>
+</blockquote>
+</div>
+<div class="cell-md doc"><h3 id="a.1-the-limit-cycle-γ-and-its-period">0a.1 The limit cycle Γ and
+its period</h3>
+<p>Start anywhere; after a while the trajectory repeats itself: it has
+reached the limit cycle Γ. The time it takes to go once around is the
+period T.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [6] &middot; 7 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7</pre><pre><code class="language-python">start = np.array([OSC[&quot;start&quot;][X], OSC[&quot;start&quot;][Y]])
+t, x, y = trajectory(start, 6 * T)
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(12, 4))
+a1.plot(t, x, color=&quot;C0&quot;); a1.set(xlabel=&quot;t&quot;, ylabel=LX, title=&quot;from the start state: it settles into a rhythm&quot;)
+a2.plot(x, y, color=&quot;C0&quot;, lw=1); draw_cycle(a2); a2.set_title(&quot;in the phase plane: onto the closed curve Γ&quot;)
+plt.tight_layout(); plt.show()
+print(f&quot;period T = {T:.4f} (from XPP&#x27;s Initialconds &gt; Periodic)&quot;)</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_1.png" alt="output figure">
+<div class="cb out"><pre>period T = 85.2906 (from XPP&#x27;s Initialconds &gt; Periodic)
+</pre></div>
+<div class="cell-md doc"><h3 id="a.2-the-clock-on-γ">0a.2 The clock on Γ</h3>
+<p>Pick one point of Γ and call its phase 0: here γ0, the maximum of the
+first variable. The point reached from γ0 after time t has phase θ =
+t/T. The clock runs at a steady rate around Γ, so equal steps in θ are
+equal steps in <strong>time</strong>, not in distance: the marks below
+(every 0.05) are crowded where Γ is slow and sparse where it is
+fast.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [7] &middot; 13 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13</pre><pre><code class="language-python">def show_clock(theta):
+    g = gamma(theta)
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(12, 4.2))
+    draw_cycle(a1, marks=True)
+    a1.plot(*g, &quot;o&quot;, color=&quot;k&quot;, ms=12, mfc=&quot;white&quot;, mew=2.5)
+    a1.set_title(f&quot;clock on Γ: θ = {theta:.3f}&quot;)
+    a2.plot(CT / T, CX, color=&quot;k&quot;); a2.axvline(theta, color=&quot;C3&quot;); a2.plot(theta, g[0], &quot;o&quot;, color=&quot;C3&quot;, ms=9)
+    a2.set(xlabel=&quot;θ = t / T&quot;, ylabel=LX, title=f&quot;t = θT = {theta * T:.3f} after phase 0&quot;)
+    plt.tight_layout(); plt.show()
+    print(f&quot;θ = {theta:.3f}: the point ({X}, {Y}) = ({g[0]:.4g}, {g[1]:.4g}) of Γ&quot;)
+
+
+show_clock(0.25)</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_2.png" alt="output figure">
+<div class="cb out"><pre>θ = 0.250: the point (v, w) = (-34.11, 0.4584) of Γ
+</pre></div>
+<div class="cell-md doc"><p><strong>Try it:</strong> move the slider (it needs a running
+kernel).</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [8] &middot; 10 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre><pre><code class="language-python">a_theta = W.FloatSlider(value=0.25, min=0, max=0.999, step=0.005, description=&quot;θ&quot;,
+                     continuous_update=False, readout_format=&quot;.3f&quot;)
+a_out1 = W.Output()
+def _a_clock(*_):
+    with a_out1:
+        a_out1.clear_output(wait=True); show_clock(a_theta.value)
+a_theta.observe(_a_clock, &quot;value&quot;)
+display(W.VBox([a_theta, a_out1]))
+if INTERACTIVE:
+    _a_clock()</code></pre></div></div>
+<div class="cb out"><pre>VBox(children=(FloatSlider(value=0.25, continuous_update=False, description=&#x27;θ&#x27;, max=0.999, readout_format=&#x27;.3…</pre></div>
+<div class="cell-md doc"><h3 id="a.3-a-state-off-γ-falls-in-step-with-one-point-of-γ">0a.3 A
+state off Γ falls in step with one point of Γ</h3>
+<p>Take a state x0 inside Γ. Its trajectory goes to Γ, but where on Γ
+does it end up? Run it next to three points of Γ: after the transient it
+moves exactly together with <strong>one</strong> of them.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [9] &middot; 14 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14</pre><pre><code class="language-python">centre = np.array([CX.mean(), CY.mean()])
+x0 = centre + 0.5 * (gamma(0.3) - centre)           # a state inside Γ
+th0 = clock_reading(x0)[0]
+t, x, y = trajectory(x0, 4 * T)
+fig, axs = plt.subplots(1, 3, figsize=(16, 3.8), sharey=True)
+for ax, th in zip(axs, (th0 - 0.15, th0, th0 + 0.15)):
+    tg, xg, yg = trajectory(gamma(th), 4 * T)
+    ax.plot(t / T, x, color=&quot;C0&quot;, label=&quot;from x0&quot;)
+    ax.plot(tg / T, xg, &quot;--&quot;, color=&quot;C3&quot;, label=f&quot;from γ({th % 1:.3f})&quot;)
+    ax.set(xlabel=&quot;t / T&quot;, title=f&quot;x0 next to γ({th % 1:.3f})&quot;)
+    ax.legend(fontsize=8)
+axs[0].set_ylabel(LX)
+plt.tight_layout(); plt.show()
+print(f&quot;x0 = ({x0[0]:.4g}, {x0[1]:.4g}) keeps step with γ({th0:.3f}): the middle panel&quot;)</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_3.png" alt="output figure">
+<div class="cb out"><pre>x0 = (-33.81, 0.3184) keeps step with γ(0.311): the middle panel
+</pre></div>
+<div class="cell-md doc"><p>That θ0 is the <strong>clock reading</strong> of x0.</p>
+<h3
+id="a.4-the-clock-reading-asymptotic-phase-and-how-it-is-computed">0a.4
+The clock reading (asymptotic phase), and how it is computed</h3>
+<p>Formally (Winfree 1974; Guckenheimer 1975):</p>
+<p><span class="math display">\[ \lim_{t\to\infty} \big\| \Phi(t, x_0) -
+\Phi(t + \theta(x_0)\,T,\ \gamma_0) \big\| = 0 \]</span></p>
+<p>In practice: let x0 settle, note the time t_s of one of its spikes
+(the first variable crossing the threshold upward), and compare it with
+the cycle’s spike at t_c0 after γ0. If x0 fires earlier by Δ, its clock
+is ahead by Δ/T:</p>
+<p><span class="math display">\[ \theta(x_0) = \frac{t_{c0} - t_s}{T}
+\mod 1 \]</span></p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [10] &middot; 26 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre><pre><code class="language-python">def show_reading(x_, y_):
+    xs = np.array([x_, y_])
+    th = clock_reading(xs)[0]
+    if np.isnan(th):
+        print(&quot;this state has not settled after 8 periods: it starts too close to x*, the point &quot;
+              &quot;with no clock reading (section 5)&quot;)
+        return
+    g = gamma(th)
+    t, x, y = trajectory(xs, 4 * T)
+    tg, xg, yg = trajectory(g, 4 * T)
+    dd = dist(np.c_[x, y], np.c_[xg, yg])
+    fig, (a1, a2, a3) = plt.subplots(1, 3, figsize=(16, 4.2))
+    draw_cycle(a1); a1.plot(x, y, color=&quot;C0&quot;, lw=1)
+    a1.plot(*xs, &quot;o&quot;, color=&quot;C0&quot;, ms=9); a1.plot(*g, &quot;o&quot;, color=&quot;C3&quot;, ms=9)
+    a1.set_title(f&quot;the state and γ({th:.3f}) (red)&quot;)
+    a2.plot(t / T, x, color=&quot;C0&quot;, label=&quot;from the state&quot;); a2.plot(tg / T, xg, &quot;--&quot;, color=&quot;C3&quot;, label=f&quot;from γ({th:.3f})&quot;)
+    a2.set(xlabel=&quot;t / T&quot;, ylabel=LX, title=&quot;the same spikes after the transient&quot;); a2.legend(fontsize=8)
+    a3.semilogy(t / T, dd + 1e-12); a3.set(xlabel=&quot;t / T&quot;, ylabel=&quot;distance (scaled)&quot;, title=&quot;distance → 0&quot;)
+    plt.tight_layout(); plt.show()
+    print(f&quot;CLOCK READING θ = {th:.4f}: the state ({x_:.4g}, {y_:.4g}) ends up keeping step with &quot;
+          f&quot;γ({th:.4f}) = ({g[0]:.4g}, {g[1]:.4g}).&quot;)
+
+
+show_reading(*x0)
+outside = gamma(0.6) + 0.3 * (gamma(0.6) - centre)      # a state outside Γ
+show_reading(*outside)</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_4.png" alt="output figure">
+<div class="cb out"><pre>CLOCK READING θ = 0.3107: the state (-33.81, 0.3184) ends up keeping step with γ(0.3107) = (-49.18, 0.3604).
+</pre></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_5.png" alt="output figure">
+<div class="cb out"><pre>CLOCK READING θ = 0.6932: the state (-40.94, 0.09498) ends up keeping step with γ(0.6932) = (-30.18, 0.1193).
+</pre></div>
+<div class="cell-md doc"><p><strong>Try it:</strong> choose a state and press <em>Compute</em> (a
+few seconds: XPP integrates it for 8 periods).</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [11] &middot; 11 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11</pre><pre><code class="language-python">a_x = W.FloatSlider(value=float(x0[0]), min=WIN[0], max=WIN[1], step=(WIN[1] - WIN[0]) / 240,
+                    description=X, continuous_update=False, readout_format=&quot;.3g&quot;)
+a_y = W.FloatSlider(value=float(x0[1]), min=WIN[2], max=WIN[3], step=(WIN[3] - WIN[2]) / 240,
+                    description=Y, continuous_update=False, readout_format=&quot;.3g&quot;)
+a_go = W.Button(description=&quot;Compute&quot;, button_style=&quot;primary&quot;, icon=&quot;play&quot;)
+a_out2 = W.Output()
+def _a_read(*_):
+    with a_out2:
+        a_out2.clear_output(wait=True); show_reading(a_x.value, a_y.value)
+a_go.on_click(_a_read)
+display(W.VBox([W.HBox([a_x, a_y, a_go]), a_out2]))</code></pre></div></div>
+<div class="cb out"><pre>VBox(children=(HBox(children=(FloatSlider(value=-33.80656238200414, continuous_update=False, description=&#x27;v&#x27;, …</pre></div>
+<div class="cell-md doc"><h3 id="a.5-a-state-with-no-clock-reading">0a.5 A state with no clock
+reading</h3>
+<p>An unstable equilibrium x* inside Γ never moves, so it never reaches
+Γ and has no clock reading. States close to it leave it slowly, so they
+need more periods to settle, and their clock readings jump around: right
+next to x*, every phase can be found. The set of states with no clock
+reading is the <strong>phaseless set</strong>.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [12] &middot; 7 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7</pre><pre><code class="language-python">if xstar is None:
+    print(&quot;no equilibrium found inside Γ for this oscillator&quot;)
+else:
+    for f in (1e-2, 1e-4, 1e-6, 1e-8):
+        xs = xstar + np.array([f * SX, 0.0])
+        print(f&quot;x* + {f:g}·(width of Γ):  clock reading after 8 periods = {clock_reading(xs, periods=8)[0]:.4f},&quot;
+              f&quot;  after 30 periods = {clock_reading(xs, periods=30)[0]:.4f}&quot;)</code></pre></div></div>
+<div class="cb out"><pre>x* + 0.01·(width of Γ):  clock reading after 8 periods = 0.8013,  after 30 periods = 0.8013
+</pre></div>
+<div class="cb out"><pre>x* + 0.0001·(width of Γ):  clock reading after 8 periods = 0.8222,  after 30 periods = 0.8222
+</pre></div>
+<div class="cb out"><pre>x* + 1e-06·(width of Γ):  clock reading after 8 periods = nan,  after 30 periods = 0.8203
+</pre></div>
+<div class="cb out"><pre>x* + 1e-08·(width of Γ):  clock reading after 8 periods = nan,  after 30 periods = 0.7480
+</pre></div>
+<div class="cell-md doc"><p>NaN means “not settled yet”: the closer to x<em>, the more periods it
+takes, and x</em> itself never settles. Note also how much the reading
+changes between neighbouring starts near x*.</p>
+<h3 id="a-summary">0a: summary</h3>
+<ul>
+<li>Γ has a <strong>clock</strong>: θ = t/T, measured from phase 0 at
+γ0.</li>
+<li>Any other state gets a <strong>clock reading</strong> (its
+asymptotic phase): the phase of the point of Γ it ends up keeping step
+with, computed from spike times after it has settled.</li>
+<li>An unstable equilibrium has none: the <strong>phaseless
+set</strong>.</li>
+</ul>
+<p><strong>Next, part 0b:</strong> all states with the same clock
+reading form a curve, an <strong>isochron</strong>; near Γ these curves
+are straight lines that give the infinitesimal phase response curve.</p>
+</div>
+<div class="cell-md doc"><h2
+id="b.-curves-of-equal-clock-reading-the-isochrons-and-why-they-are-straight-near-γ">0b.
+Curves of equal clock reading: the isochrons, and why they are straight
+near Γ</h2>
+<blockquote>
+<p>The curves of equal asymptotic phase are the
+<strong>isochrons</strong> (Winfree 1974). <strong>Near Γ</strong> they
+are short straight lines, and their directions give the familiar
+<strong>infinitesimal phase response curve</strong>.</p>
+</blockquote>
+</div>
+<div class="cell-md doc"><h3 id="b.12-the-phase-map-and-its-contour-lines-isochrons">0b.1–2 The
+phase map and its contour lines: isochrons</h3>
+<p>Colour = clock reading of each state (from 00a). The
+<strong>isochron</strong> I(γ) of a point γ of Γ is the set of all
+states with γ’s clock reading: a contour line of the phase map. Each one
+crosses Γ once, at the point with that phase (white dots).</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [13] &middot; 9 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9</pre><pre><code class="language-python">fig, ax = plt.subplots(figsize=(8.5, 6))
+phase_background(ax)
+for lv in np.arange(0, 1, 0.1):
+    isochron(ax, lv, colors=&quot;k&quot;, linewidths=0.9)
+draw_cycle(ax)
+for lv in np.arange(0, 1, 0.1):
+    ax.plot(*gamma(lv), &quot;o&quot;, color=&quot;k&quot;, mfc=&quot;white&quot;, ms=6)
+ax.set_title(&quot;isochrons θ = 0, 0.1, …, 0.9: contour lines of the clock reading&quot;)
+plt.show()</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_6.png" alt="output figure">
+<div class="cell-md doc"><h3 id="b.3-states-on-one-isochron-move-together">0b.3 States on one
+isochron move together</h3>
+<p>Take many states on the isochron θ = 0.2 and let them all move. At
+every moment they lie on one isochron again (of phase 0.2 + t/T: the
+flow carries isochrons to isochrons), and they all shrink onto the one
+point of Γ whose clock reads the same.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [14] &middot; 17 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17</pre><pre><code class="language-python">grid = np.c_[VG.ravel(), WG.ravel()]
+sel = grid[np.abs(TH.ravel() - 0.2) &lt; 0.004][:NC]
+ic = {}
+for j in range(NC):
+    p = sel[j] if j &lt; len(sel) else sel[0]
+    ic[f&quot;{X}{j}&quot;], ic[f&quot;{Y}{j}&quot;] = p[0], p[1]
+net.ics.update(ic)
+A = net.run(total=1.2 * T, trans=0).array
+fig, axs = plt.subplots(1, 5, figsize=(18, 3.6), sharey=True)
+for ax, tt in zip(axs, (0, 0.05, 0.15, 0.4, 1.0)):
+    k = int(np.argmin(np.abs(A[:, 0] - tt * T)))
+    phase_background(ax); draw_cycle(ax)
+    isochron(ax, (0.2 + tt) % 1, colors=&quot;C0&quot;, linewidths=1.5)
+    ax.plot(A[k, 1:1 + len(sel)], A[k, 1 + NC:1 + NC + len(sel)], &quot;.&quot;, color=&quot;k&quot;, ms=3)
+    ax.plot(*gamma(0.2 + tt), &quot;o&quot;, color=&quot;C3&quot;, ms=9)
+    ax.set_title(f&quot;t = {tt:g} T: on isochron {(0.2 + tt) % 1:.2f}&quot;)
+plt.tight_layout(); plt.show()</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_7.png" alt="output figure">
+<div class="cell-md doc"><h3 id="b.4-near-γ-an-isochron-is-a-straight-line">0b.4 Near Γ an
+isochron is a straight line</h3>
+<p>Zoom in on Γ at γ(θ): the isochron (red) is a straight line through
+γ(θ), perpendicular to the adjoint Z(θ), the gradient of the clock
+reading. How far is that true? Measure the clock reading of points on
+the straight line at growing distance (each variable scaled by the size
+of Γ): it stays θ, to the accuracy of the computation, close to Γ, and
+drifts further out, where the isochron starts to bend (00c).</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [15] &middot; 26 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre><pre><code class="language-python">def show_near(theta):
+    g, step = gamma(theta), isochron_step(theta)
+    dd = np.r_[-np.geomspace(0.2, 1e-4, 12), np.geomspace(1e-4, 0.2, 12)]
+    pts = np.array([g + d * step for d in dd])
+    dev = (clock_reading(pts) - theta + 0.5) % 1 - 0.5
+    z = Z(theta)
+    zs = np.array([z[0] * SX, z[1] * SY]); zs /= np.hypot(*zs)
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 4.6))
+    phase_background(a1)
+    isochron(a1, theta, colors=&quot;C3&quot;, linewidths=2.5)
+    draw_cycle(a1)
+    a1.plot(pts[:, 0], pts[:, 1], &quot;k--&quot;, lw=1.5)
+    a1.quiver(*g, 0.05 * SX * zs[0], 0.05 * SY * zs[1], color=&quot;C0&quot;, angles=&quot;xy&quot;, scale_units=&quot;xy&quot;,
+              scale=1, width=0.005)
+    a1.plot(*g, &quot;ko&quot;)
+    a1.set(xlim=(g[0] - 0.15 * SX, g[0] + 0.15 * SX), ylim=(g[1] - 0.15 * SY, g[1] + 0.15 * SY),
+           title=f&quot;γ({theta:.2f}): isochron (red), straight line ⊥ Z (dashed), Z (blue)&quot;)
+    a2.loglog(np.abs(dd[dd &lt; 0]), np.abs(dev[dd &lt; 0]) + 1e-8, &quot;o-&quot;, label=&quot;one side&quot;)
+    a2.loglog(dd[dd &gt; 0], np.abs(dev[dd &gt; 0]) + 1e-8, &quot;s-&quot;, label=&quot;other side&quot;)
+    a2.set(xlabel=&quot;distance from γ along the line (scaled by the size of Γ)&quot;,
+           ylabel=&quot;|clock reading − θ|&quot;, title=&quot;straight near Γ, bending further out&quot;)
+    a2.legend(fontsize=8)
+    plt.tight_layout(); plt.show()
+
+
+show_near(0.25)</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_8.png" alt="output figure">
+<div class="cell-md doc"><p><strong>Try it:</strong> another phase (press <em>Compute</em>).</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [16] &middot; 8 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8</pre><pre><code class="language-python">b_theta = W.FloatSlider(value=0.6, min=0, max=0.999, step=0.01, description=&quot;θ&quot;, continuous_update=False)
+b_go = W.Button(description=&quot;Compute&quot;, button_style=&quot;primary&quot;, icon=&quot;play&quot;)
+b_out = W.Output()
+def _b_near(*_):
+    with b_out:
+        b_out.clear_output(wait=True); show_near(b_theta.value)
+b_go.on_click(_b_near)
+display(W.VBox([W.HBox([b_theta, b_go]), b_out]))</code></pre></div></div>
+<div class="cb out"><pre>VBox(children=(HBox(children=(FloatSlider(value=0.6, continuous_update=False, description=&#x27;θ&#x27;, max=0.999, step…</pre></div>
+<div class="cell-md doc"><h3
+id="b.5-the-direction-gives-the-infinitesimal-phase-response-curve">0b.5
+The direction gives the infinitesimal phase response curve</h3>
+<p>A small kick Δ in the first variable at phase θ moves the state off Γ
+by (Δ, 0). Its clock reading changes by about Z_x(θ)·Δ / T: the
+component of the kick across the isochrons. The curve Z_x(θ)/T is the
+<strong>infinitesimal phase response curve (PRC)</strong>. Check it
+against small kicks computed directly with the clock reading:</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [17] &middot; 12 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12</pre><pre><code class="language-python">ths = np.linspace(0, 1, 60, endpoint=False)
+fig, ax = plt.subplots(figsize=(8, 4.5))
+for f in (0.005, 0.02):
+    dk = f * SX
+    new = clock_reading([gamma(t) + np.array([dk, 0.0]) for t in ths])
+    ax.plot(ths, ((new - ths + 0.5) % 1 - 0.5) / dk, &quot;o&quot;, ms=4, label=f&quot;computed kicks Δ = {dk:.3g}: Δθ/Δ&quot;)
+ax.plot(ZT / T, ZX / T, &quot;k-&quot;, label=&quot;infinitesimal PRC Z_x / T (from the adjoint)&quot;)
+ax.axhline(0, color=&quot;0.7&quot;, lw=0.8)
+ax.set(xlabel=&quot;phase θ at which the kick arrives&quot;, ylabel=f&quot;phase shift per unit {X}&quot;,
+       title=&quot;small kicks follow the infinitesimal PRC&quot;)
+ax.legend(fontsize=8)
+plt.show()</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_9.png" alt="output figure">
+<div class="cell-md doc"><h3 id="b-summary">0b: summary</h3>
+<ul>
+<li>An <strong>isochron</strong> is a curve of equal clock reading: a
+contour line of the phase map.</li>
+<li>States on one isochron move together; the flow carries isochrons to
+isochrons.</li>
+<li><strong>Near Γ</strong> each isochron is a straight line
+perpendicular to the adjoint Z; Z_x/T is the <strong>infinitesimal
+PRC</strong>, which small kicks follow.</li>
+</ul>
+<p><strong>Next, part 0c:</strong> far from Γ the isochrons bend, fold
+and pile up, and large kicks no longer follow the infinitesimal PRC.</p>
+</div>
+<div class="cell-md doc"><h2
+id="c.-far-from-γ-isochrons-bend-fold-and-pile-up-and-large-kicks">0c.
+Far from Γ: isochrons bend, fold and pile up, and large kicks</h2>
+<blockquote>
+<p><strong>Far from Γ</strong> they can bend, fold and pile up, and that
+is what decides how an oscillator responds to a <strong>large
+kick</strong>.</p>
+</blockquote>
+</div>
+<div class="cell-md doc"><h3 id="c.1-bending">0c.1 Bending</h3>
+<p>Isochrons start as straight lines at Γ (00b) and then curve. Below:
+four isochrons, each with its straight start (dashed) drawn far out.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [18] &middot; 10 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre><pre><code class="language-python">fig, ax = plt.subplots(figsize=(8.5, 6))
+phase_background(ax)
+for lv, col in ((0.1, &quot;C0&quot;), (0.3, &quot;C1&quot;), (0.5, &quot;C2&quot;), (0.75, &quot;C4&quot;)):
+    isochron(ax, lv, colors=col, linewidths=2.2)
+    g, step = gamma(lv), isochron_step(lv)
+    s = np.array([-0.4, 0.4])
+    ax.plot(g[0] + step[0] * s, g[1] + step[1] * s, &quot;--&quot;, color=col, lw=1.2)
+draw_cycle(ax)
+ax.set_title(&quot;isochrons (solid) bend away from their straight start at Γ (dashed)&quot;)
+plt.show()</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_10.png" alt="output figure">
+<div class="cell-md doc"><h3 id="c.2-folding-around-the-equilibrium">0c.2 Folding around the
+equilibrium</h3>
+<p>Every isochron must end at x<em>, the state with no clock reading.
+Near an unstable spiral the isochrons wind around it, so all phases meet
+in any small neighbourhood of x</em>. Zoom in:</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [19] &middot; 28 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre><pre><code class="language-python">if xstar is None:
+    print(&quot;no equilibrium found inside Γ for this oscillator&quot;)
+else:
+    # the main phase map is too coarse here: a fine one around x*, computed once and stored
+    LOCAL = MAPFILE.with_name(MAPFILE.stem + &quot;_near_xstar.npz&quot;)
+    f = 0.12
+    if LOCAL.exists():
+        dl = np.load(LOCAL); LV, LW, LT = dl[&quot;V&quot;], dl[&quot;W&quot;], dl[&quot;TH&quot;]
+    else:
+        LV, LW = np.meshgrid(np.linspace(xstar[0] - f * SX, xstar[0] + f * SX, 101),
+                             np.linspace(xstar[1] - f * SY, xstar[1] + f * SY, 101))
+        gl = np.c_[LV.ravel(), LW.ravel()]
+        LT = np.concatenate([clock_reading(gl[s:s + 1000], periods=12)
+                             for s in tqdm(range(0, len(gl), 1000), desc=&quot;fine map near x*&quot;)]).reshape(LV.shape)
+        np.savez(LOCAL, V=LV, W=LW, TH=LT)
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 5))
+    for ax, zoom in ((a1, 1.0), (a2, 0.35)):
+        ax.pcolormesh(LV, LW, LT, cmap=&quot;hsv&quot;, shading=&quot;auto&quot;, vmin=0, vmax=1, alpha=0.6)
+        for lv in np.arange(0.05, 1, 0.1):
+            F = LT if 0.25 &lt;= lv &lt;= 0.75 else (LT + 0.5) % 1
+            ax.contour(LV, LW, no_wrap(F), [lv if 0.25 &lt;= lv &lt;= 0.75 else (lv + 0.5) % 1],
+                       colors=&quot;k&quot;, linewidths=0.8)
+        ax.plot(CX, CY, color=&quot;k&quot;, lw=2.5); ax.plot(*xstar, &quot;x&quot;, color=&quot;k&quot;, ms=10, mew=2)
+        ax.set(xlim=(xstar[0] - zoom * f * SX, xstar[0] + zoom * f * SX),
+               ylim=(xstar[1] - zoom * f * SY, xstar[1] + zoom * f * SY), xlabel=LX, ylabel=LY,
+               title=f&quot;near x*: ±{zoom * f:.3g} of the size of Γ (isochrons every 0.1)&quot;)
+    plt.tight_layout(); plt.show()
+    print(&quot;every colour, i.e. every phase, comes into any small window around x*&quot;)</code></pre></div></div>
+<div class="cb out"><pre>fine map near x*:   0%|          | 0/11 [00:00&lt;?, ?it/s]</pre></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_11.png" alt="output figure">
+<div class="cb out"><pre>every colour, i.e. every phase, comes into any small window around x*
+</pre></div>
+<div class="cell-md doc"><h3 id="c.3-piling-up">0c.3 Piling up</h3>
+<p>Sample the clock reading along a horizontal line across the inside of
+Γ, halfway between x* and the top of Γ. Where the line crosses a
+pile-up, the reading runs through a large part of the cycle over a tiny
+distance.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [20] &middot; 16 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16</pre><pre><code class="language-python">yl = (xstar[1] if xstar is not None else CY.mean()) + 0.5 * (CY.max() - (xstar[1] if xstar is not None else CY.mean()))
+xl = np.linspace(CX.min(), CX.max(), 400)
+thl = clock_reading(np.c_[xl, np.full_like(xl, yl)])
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(13, 4.3))
+phase_background(a1)
+for lv in np.arange(0, 1, 0.1):
+    isochron(a1, lv, colors=&quot;k&quot;, linewidths=0.8)
+draw_cycle(a1); a1.plot(xl, np.full_like(xl, yl), &quot;C0-&quot;, lw=2)
+a1.set_title(f&quot;the line {Y} = {yl:.3g} (blue)&quot;)
+a2.plot(xl, thl, &quot;.&quot;, ms=3)
+a2.set(xlabel=f&quot;{LX} on {Y} = {yl:.3g}&quot;, ylabel=&quot;clock reading&quot;, title=&quot;where the reading changes fast, isochrons pile up&quot;)
+plt.tight_layout(); plt.show()
+dth = np.abs(np.diff(np.unwrap(2 * np.pi * np.nan_to_num(thl)) / (2 * np.pi)))
+k = int(np.argmax(dth))
+print(f&quot;steepest step: {dth[k]:.3f} of a cycle between {X} = {xl[k]:.4g} and {xl[k + 1]:.4g} &quot;
+      f&quot;({xl[1] - xl[0]:.3g} apart)&quot;)</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_12.png" alt="output figure">
+<div class="cb out"><pre>steepest step: 0.311 of a cycle between v = -4.207 and -3.997 (0.21 apart)
+</pre></div>
+<div class="cell-md doc"><h3 id="c.4-a-large-kick-where-it-lands-decides-everything">0c.4 A large
+kick: where it lands decides everything</h3>
+<p>A kick Δ in the first variable at phase θ moves the state from γ(θ)
+to γ(θ) + (Δ, 0). Its new clock reading is that of the isochron it lands
+on. A small kick lands among straight isochrons and follows the
+infinitesimal PRC; a large kick lands among bent, folded or piled-up
+ones.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [21] &middot; 25 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre><pre><code class="language-python">def show_kick(theta, dk):
+    g = gamma(theta)
+    kicked = g + np.array([dk, 0.0])
+    th_new = clock_reading(kicked)[0]
+    fig, ax = plt.subplots(figsize=(8.5, 6))
+    phase_background(ax)
+    for lv in np.arange(0, 1, 0.1):
+        isochron(ax, lv, colors=&quot;k&quot;, linewidths=0.8)
+    draw_cycle(ax)
+    ax.annotate(&quot;&quot;, kicked, g, arrowprops=dict(arrowstyle=&quot;-&gt;&quot;, lw=2.5, color=&quot;k&quot;))
+    ax.plot(*g, &quot;o&quot;, color=&quot;k&quot;, ms=8); ax.plot(*kicked, &quot;o&quot;, color=&quot;C0&quot;, ms=10)
+    if not np.isnan(th_new):
+        isochron(ax, th_new, colors=&quot;C0&quot;, linewidths=2.5)
+    ax.set_title(f&quot;kick Δ{X} = {dk:+.3g} at θ = {theta:.2f}&quot;)
+    plt.show()
+    if np.isnan(th_new):
+        print(&quot;the kicked state has no clock reading yet (it landed next to x*)&quot;)
+        return
+    sh = (th_new - theta + 0.5) % 1 - 0.5
+    print(f&quot;clock reading before {theta:.4f}, after {th_new:.4f}: shift {sh:+.4f} cycles &quot;
+          f&quot;({&#x27;advance&#x27; if sh &gt; 0 else &#x27;delay&#x27;}); the infinitesimal PRC predicts {Z(theta)[0] * dk / T:+.4f}&quot;)
+
+
+show_kick(0.6, 0.03 * SX)
+show_kick(0.6, 0.35 * SX)</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_13.png" alt="output figure">
+<div class="cb out"><pre>clock reading before 0.6000, after 0.6042: shift +0.0042 cycles (advance); the infinitesimal PRC predicts +0.0027
+</pre></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_14.png" alt="output figure">
+<div class="cb out"><pre>clock reading before 0.6000, after 0.9149: shift +0.3149 cycles (advance); the infinitesimal PRC predicts +0.0309
+</pre></div>
+<div class="cell-md doc"><p><strong>Try it:</strong> choose the phase and the kick, press
+<em>Compute</em>.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [22] &middot; 10 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10</pre><pre><code class="language-python">c_theta = W.FloatSlider(value=0.45, min=0, max=0.999, step=0.01, description=&quot;θ&quot;, continuous_update=False)
+c_kick = W.FloatSlider(value=float(0.25 * SX), min=float(-0.5 * SX), max=float(0.5 * SX), step=float(SX / 200),
+                     description=f&quot;Δ{X}&quot;, continuous_update=False, readout_format=&quot;.3g&quot;)
+c_go = W.Button(description=&quot;Compute&quot;, button_style=&quot;primary&quot;, icon=&quot;play&quot;)
+c_out = W.Output()
+def _c_kick(*_):
+    with c_out:
+        c_out.clear_output(wait=True); show_kick(c_theta.value, c_kick.value)
+c_go.on_click(_c_kick)
+display(W.VBox([W.HBox([c_theta, c_kick, c_go]), c_out]))</code></pre></div></div>
+<div class="cb out"><pre>VBox(children=(HBox(children=(FloatSlider(value=0.45, continuous_update=False, description=&#x27;θ&#x27;, max=0.999, ste…</pre></div>
+<div class="cell-md doc"><h3 id="c.5-prcs-for-growing-kicks">0c.5 PRCs for growing kicks</h3>
+<p>The phase shift against the phase at which the kick arrives, for
+kicks from 1 % to 40 % of the width of Γ, each divided by the kick so
+that the infinitesimal PRC Z_x/T is the common limit. Small kicks follow
+it; large kicks do not, and the PRC jumps where kicks start to land
+across a pile-up.</p>
+</div>
+<div class="cb"><div class="cb-head"><span>In [23] &middot; 15 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre><pre><code class="language-python">ths = np.linspace(0, 1, 80, endpoint=False)
+fig, (a1, a2) = plt.subplots(1, 2, figsize=(14, 4.6))
+for f, col in zip((0.01, 0.05, 0.1, 0.2, 0.4), plt.cm.viridis(np.linspace(0, 0.9, 5))):
+    dk = f * SX
+    new = clock_reading([gamma(t) + np.array([dk, 0.0]) for t in ths])
+    sh = (new - ths + 0.5) % 1 - 0.5
+    a1.plot(ths, sh / dk, &quot;.-&quot;, color=col, ms=3, label=f&quot;Δ = {f:g} × width&quot;)
+    a2.plot(ths, sh, &quot;.-&quot;, color=col, ms=3, label=f&quot;Δ = {f:g} × width&quot;)
+a1.plot(ZT / T, ZX / T, &quot;k--&quot;, lw=1.5, label=&quot;Z_x / T&quot;)
+lim = 1.5 * np.abs(ZX / T).max()
+a1.set(xlabel=&quot;phase θ&quot;, ylabel=&quot;Δθ / Δ&quot;, title=&quot;per unit kick: only small kicks match Z_x/T&quot;, ylim=(-lim, lim))
+a2.set(xlabel=&quot;phase θ&quot;, ylabel=&quot;Δθ (cycles)&quot;, title=&quot;the phase shift itself&quot;)
+for ax in (a1, a2):
+    ax.axhline(0, color=&quot;0.7&quot;, lw=0.8); ax.legend(fontsize=7)
+plt.tight_layout(); plt.show()</code></pre></div></div>
+<img class="cell-img" loading="lazy" src="nb/nb0_15.png" alt="output figure">
+<div class="cell-md doc"><h3 id="c-summary">0c: summary</h3>
+<ul>
+<li>Far from Γ the isochrons <strong>bend</strong> away from their
+straight start, <strong>fold</strong> around the equilibrium (every
+phase meets near x*), and <strong>pile up</strong> where the clock
+reading changes through a large part of the cycle over a tiny
+distance.</li>
+<li>A <strong>large kick</strong> lands among them: its phase shift is
+read from the isochron it lands on, not from the infinitesimal PRC, and
+the PRC jumps where kicks start crossing a pile-up.</li>
+</ul>
+<p><strong>Next, stage 01:</strong> the same ideas in detail for
+FitzHugh–Nagumo and the reduced Hodgkin–Huxley neuron, where the pile-up
+becomes too thin for any grid.</p>
+</div>
+</div>
+</main>
+<footer><div class="wrap">
+  <p><b style="color:var(--fg)">notebook</b>, a guided reading of H. M. Osinga and J. Moehlis, <i>Continuation-based computation of global isochrons</i>, SIAM J. Appl. Dyn. Syst. 9 (2010) 1201&ndash;1228
+     (<a href="https://sites.me.ucsb.edu/~moehlis/moehlis_papers/isochrons.pdf" target="_blank" rel="noopener">the paper</a>).
+     Every simulation is computed by Bard Ermentrout's
+     <a href="https://sites.pitt.edu/~phase/bard/bardware/xpp/xpp.html" target="_blank" rel="noopener">XPPAUT</a>
+     through <a href="https://zetaone.github.io/pyauto-xpp/">pyauto-xpp</a>.</p>
+  <p>Made by Jeevan Kumar Gochhayat (<a href="https://github.com/ZetaOne">github.com/ZetaOne</a>) &middot;
+     <a href="https://zetaone.github.io/pyauto-xpp/">pyauto-xpp</a> &middot; <a href="https://zetaone.github.io/XPPAUT-Web/">XPPAUT-Web</a> &middot; <a href="https://github.com/ZetaOne/notebook">Source of this site</a></p>
+</div></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha512-AKaNmg8COK0zEbjTdMHJAPJ0z6VeNqvRvH4/d5M4sHJbQQUToMBtodq4HaV4fa+WV2UTfoperElm66c9/8cKmQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha512-whYhDwtTmlC/NpZlCr6PSsAaLOrfjVg/iXAnC4H/dtiHawpShhT2SlIMbpIhT/IL/NrpdMm+Hq2C13+VKpHTYw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+(function () {
+  const D = window.PYX_DISPLAY, root = document.documentElement, $ = id => document.getElementById(id);
+  const THEMES = [{"id": "system", "name": "System (light/dark)", "swatch": ["#ffffff", "#5c6670", "#222326", "#2a3038"]}, {"id": "light", "name": "Light", "swatch": ["#ffffff", "#e6e6e1", "#5c6670", "#2f5d8a"]}, {"id": "dark", "name": "Dark", "swatch": ["#222326", "#34363a", "#2a3038", "#4b7fb3"]}, {"id": "midnight", "name": "Midnight Blue", "swatch": ["#101d36", "#1c3158", "#14274a", "#3d7bd9"]}, {"id": "solarized-light", "name": "Solarized Light", "swatch": ["#fdf6e3", "#eee8d5", "#586e75", "#268bd2"]}, {"id": "solarized-dark", "name": "Solarized Dark", "swatch": ["#002b36", "#073642", "#0a3a47", "#268bd2"]}, {"id": "nord", "name": "Nord", "swatch": ["#3b4252", "#4c566a", "#434c5e", "#5e81ac"]}, {"id": "dracula", "name": "Dracula", "swatch": ["#282a36", "#44475a", "#343746", "#bd93f9"]}, {"id": "sepia", "name": "Sepia", "swatch": ["#faf4e6", "#ebdfc4", "#7a6344", "#8b5a2b"]}, {"id": "contrast", "name": "High Contrast", "swatch": ["#000000", "#ffffff", "#000000", "#ffff00"]}, {"id": "funky1", "name": "Funky 1 (Fairy Floss)", "swatch": ["#5a5475", "#ffb8d1", "#c2ffdf", "#c5a3ff"]}, {"id": "funky2", "name": "Funky 2 (Night Owl)", "swatch": ["#011627", "#82aaff", "#c792ea", "#addb67"]}, {"id": "funky3", "name": "Funky 3 (Synthwave)", "swatch": ["#241b2f", "#ff7edb", "#36f9f6", "#fede5d"]}], FONTS = [["system", "System (default)", "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"], ["serif", "Serif (Charter, Georgia)", "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif"], ["atkinson", "Atkinson Hyperlegible", "'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"], ["lexend", "Lexend", "'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"]];
+  const store = {
+    get(k) { try { return localStorage.getItem(k) } catch (e) { return null } },
+    set(k, v) { try { localStorage.setItem(k, v) } catch (e) {} },
+  };
+  const changed = () => document.dispatchEvent(new CustomEvent('pyx-display'));
+  const check = (box, key, v) => { for (const b of box.querySelectorAll('button')) b.setAttribute('aria-checked', String(b.dataset[key] === v)) };
+  // the code colours follow the theme: VS Code Dark+ on dark themes, Light+ on light ones
+  function setCode(scheme) {
+    const dark = D.theme === 'system' ? matchMedia('(prefers-color-scheme: dark)').matches : D.DARK[D.theme];
+    root.dataset.code = scheme || (dark ? 'dark' : 'light');
+    for (const l of document.querySelectorAll('link[data-code]')) l.media = l.dataset.code === root.dataset.code ? 'all' : 'not all';
+  }
+  function applyTheme(id) {
+    D.theme = id;
+    if (id === 'system') delete root.dataset.theme; else root.dataset.theme = id;
+    check($('themelist'), 'theme', id);
+    setCode();
+    // the phone's status bar takes the toolbar's colour
+    const bar = getComputedStyle(root).getPropertyValue('--bar').trim(), meta = document.querySelector('meta[name="theme-color"]');
+    if (bar && meta) meta.setAttribute('content', bar);
+    changed();
+  }
+  function applySize(z) { D.size = z; root.dataset.textsize = z; check($('sizelist'), 'size', z); changed() }
+  function applyFont(f) {
+    D.font = f; root.dataset.font = f; check($('fontlist'), 'font', f);
+    // a web font is downloaded only when it is chosen
+    if (D.FONTS[f] && !$('webfont-' + f)) {
+      const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = D.FONTS[f]; l.id = 'webfont-' + f;
+      l.onload = changed; document.head.append(l);
+    }
+    if (document.fonts) document.fonts.ready.then(changed);
+    changed();
+  }
+  window.pyxSetCode = setCode;
+  const button = (box, attrs, html, onclick) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('role', 'radio');
+    for (const k in attrs) b.dataset[k] = attrs[k];
+    b.innerHTML = html; b.addEventListener('click', onclick); box.append(b); return b;
+  };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  for (const z of D.SIZES) {
+    const b = button($('sizelist'), { size: z }, '<b style="font-size:' + (0.95 * z / 100) + 'rem">A</b><small>' + z + '%</small>',
+      () => { applySize(z); store.set('pyauto-xpp-textsize', z) });
+    b.setAttribute('aria-label', 'Text size ' + z + '%');
+  }
+  for (const [id, name, stack] of FONTS)
+    button($('fontlist'), { font: id }, '<span style="font-family:' + esc(stack) + '">' + esc(name) + '</span>' +
+      (D.FONTS[id] ? '<small>web font</small>' : ''), () => { applyFont(id); store.set('pyauto-xpp-font', id) });
+  for (const t of THEMES)
+    button($('themelist'), { theme: t.id }, '<span class="swatch">' + t.swatch.map(c => '<i style="background:' + c + '"></i>').join('') +
+      '</span>' + esc(t.name), () => { applyTheme(t.id); store.set('pyauto-xpp-theme', t.id); closeMenus(true) });
+  applyTheme(D.theme); applySize(D.size); applyFont(D.font);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => applyTheme(D.theme));
+  // printing: light code colours on white paper
+  addEventListener('beforeprint', () => setCode('light'));
+  addEventListener('afterprint', () => setCode());
+
+  // ---- toolbar menus: Esc or a click elsewhere closes them; arrows move inside --
+  const menus = () => [...document.querySelectorAll('header details')];
+  function closeMenus(refocus) {
+    for (const d of menus()) if (d.open) { d.open = false; if (refocus) d.querySelector('summary').focus() }
+  }
+  for (const d of menus()) {
+    d.addEventListener('toggle', () => {
+      if (!d.open) return;
+      for (const o of menus()) if (o !== d) o.open = false;
+      const items = [...d.querySelectorAll('.panel button, .panel a')];
+      (items.find(b => b.getAttribute('aria-checked') === 'true') || items[0])?.focus();
+    });
+    d.addEventListener('keydown', e => {
+      const items = [...d.querySelectorAll('.panel button, .panel a')], i = items.indexOf(document.activeElement);
+      if (!d.open || i < 0) return;
+      const go = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key];
+      if (go === undefined) return;
+      e.preventDefault(); items[(go + items.length) % items.length].focus();
+    });
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && menus().some(d => d.open)) { e.preventDefault(); closeMenus(true) } });
+  document.addEventListener('pointerdown', e => { for (const d of menus()) if (d.open && !d.contains(e.target)) d.open = false });
+})();
+</script>
+<script>
+if (window.Prism && Prism.languages) {
+  Prism.languages.ode = {
+    'after-done': { pattern: /(^done[ \t]*\n)[\s\S]*/m, lookbehind: true, alias: 'comment' },
+    comment: [{ pattern: /(^|\s)#.*/m, lookbehind: true }, { pattern: /^\s*".*/m }],
+    keyword: { pattern: /^(\s*)(?:par(?:am)?|p|init|i|aux|number|num|done|set|global|table|wiener|markov|bdry|volt|special|only|export|options|load|keys|autokeys|ans|auto|try|else|end|for|shot|quit|msg|speed)\b|^\s*@/m, lookbehind: true },
+    property: { pattern: /^(\s*)(?:\w+'|d\w+\/dt|\w+\(t\+dt\))(?=\s*=)/m, lookbehind: true },
+    function: /\b\w+(?=\()/,
+    number: /(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[+-]?\d+)?\b/i,
+    operator: /[-+*\/^=<>!]/,
+    punctuation: /[(){},;\[\]]/,
+  };
+  try { Prism.highlightAll() } catch (e) {}
+}
+for (const b of document.querySelectorAll('.cb-copy')) b.addEventListener('click', async () => {
+  const t = b.closest('.cb').querySelector('pre:not(.ln) code').textContent;
+  try { await navigator.clipboard.writeText(t); b.textContent = 'Copied' } catch (e) { b.textContent = 'Select and copy' }
+  setTimeout(() => b.textContent = 'Copy', 1500);
+});
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script><script>renderMathInElement(document.querySelector("main"),{delimiters:[{left:"$$",right:"$$",display:true},{left:"\\[",right:"\\]",display:true},{left:"\\(",right:"\\)",display:false},{left:"$",right:"$",display:false}],ignoredTags:["script","noscript","style","textarea","pre","code"],throwOnError:false})</script>
+
+</body></html>

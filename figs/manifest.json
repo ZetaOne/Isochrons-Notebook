@@ -1,0 +1,359 @@
+{
+ "ch01_blob": {
+  "file": "ch01_blob_still.png",
+  "gif": "ch01_blob.gif",
+  "script": "ch01_figs.py",
+  "still": "ch01_blob_still.png",
+  "wide": false
+ },
+ "ch01_fhn": {
+  "file": "ch01_fhn.svg",
+  "png": "ch01_fhn.png",
+  "script": "ch01_figs.py",
+  "wide": false
+ },
+ "ch01_hopf": {
+  "file": "ch01_hopf.svg",
+  "png": "ch01_hopf.png",
+  "script": "ch01_figs.py",
+  "wide": true
+ },
+ "ch01_linear": {
+  "file": "ch01_linear.svg",
+  "png": "ch01_linear.png",
+  "script": "ch01_figs.py",
+  "wide": true
+ },
+ "ch01_polar": {
+  "file": "ch01_polar.svg",
+  "png": "ch01_polar.png",
+  "script": "ch01_figs.py",
+  "wide": true
+ },
+ "ch02_circle": {
+  "file": "ch02_circle.svg",
+  "png": "ch02_circle.png",
+  "script": "ch02_figs.py",
+  "wide": true
+ },
+ "ch02_markers": {
+  "file": "ch02_markers_still.png",
+  "gif": "ch02_markers.gif",
+  "script": "ch02_figs.py",
+  "still": "ch02_markers_still.png",
+  "wide": false
+ },
+ "ch02_speed": {
+  "file": "ch02_speed.svg",
+  "png": "ch02_speed.png",
+  "script": "ch02_figs.py",
+  "wide": true
+ },
+ "ch03_liouville": {
+  "file": "ch03_liouville.svg",
+  "png": "ch03_liouville.png",
+  "script": "ch03_figs.py",
+  "wide": true
+ },
+ "ch03_monodromy": {
+  "file": "ch03_monodromy_still.png",
+  "gif": "ch03_monodromy.gif",
+  "script": "ch03_figs.py",
+  "still": "ch03_monodromy_still.png",
+  "wide": false
+ },
+ "ch03_returnmap": {
+  "file": "ch03_returnmap.svg",
+  "png": "ch03_returnmap.png",
+  "script": "ch03_figs.py",
+  "wide": true
+ },
+ "ch03_section": {
+  "file": "ch03_section_still.png",
+  "gif": "ch03_section.gif",
+  "script": "ch03_figs.py",
+  "still": "ch03_section_still.png",
+  "wide": false
+ },
+ "ch04_cloud": {
+  "file": "ch04_cloud_still.png",
+  "gif": "ch04_cloud.gif",
+  "script": "ch04_figs.py",
+  "still": "ch04_cloud_still.png",
+  "wide": false
+ },
+ "ch04_def": {
+  "file": "ch04_def_still.png",
+  "gif": "ch04_def.gif",
+  "script": "ch04_figs.py",
+  "still": "ch04_def_still.png",
+  "wide": false
+ },
+ "ch04_radial_spiral": {
+  "file": "ch04_radial_spiral.svg",
+  "png": "ch04_radial_spiral.png",
+  "script": "ch04_figs.py",
+  "wide": true
+ },
+ "ch04_vdp": {
+  "file": "ch04_vdp.svg",
+  "png": "ch04_vdp.png",
+  "script": "ch04_figs.py",
+  "wide": true
+ },
+ "ch05_bundle": {
+  "file": "ch05_bundle.svg",
+  "png": "ch05_bundle.png",
+  "script": "ch05_figs.py",
+  "wide": true
+ },
+ "ch05_iterates": {
+  "file": "ch05_iterates.svg",
+  "png": "ch05_iterates.png",
+  "script": "ch05_figs.py",
+  "wide": false
+ },
+ "ch05_saddle": {
+  "file": "ch05_saddle.svg",
+  "png": "ch05_saddle.png",
+  "script": "ch05_figs.py",
+  "wide": true
+ },
+ "ch06_gradient": {
+  "file": "ch06_gradient.svg",
+  "png": "ch06_gradient.png",
+  "script": "ch06_figs.py",
+  "wide": false
+ },
+ "ch06_kick": {
+  "file": "ch06_kick_still.png",
+  "gif": "ch06_kick.gif",
+  "script": "ch06_figs.py",
+  "still": "ch06_kick_still.png",
+  "wide": false
+ },
+ "ch06_prc": {
+  "file": "ch06_prc.svg",
+  "png": "ch06_prc.png",
+  "script": "ch06_figs.py",
+  "wide": true
+ },
+ "ch06_rhh_prc": {
+  "file": "ch06_rhh_prc.svg",
+  "png": "ch06_rhh_prc.png",
+  "script": "ch06_figs.py",
+  "wide": true
+ },
+ "ch06_types": {
+  "file": "ch06_types.svg",
+  "png": "ch06_types.png",
+  "script": "ch06_figs.py",
+  "wide": true
+ },
+ "ch07_noise": {
+  "file": "ch07_noise.svg",
+  "png": "ch07_noise.png",
+  "script": "ch07_figs.py",
+  "wide": true
+ },
+ "ch07_twocycles": {
+  "file": "ch07_twocycles.svg",
+  "png": "ch07_twocycles.png",
+  "script": "ch07_figs.py",
+  "wide": true
+ },
+ "ch07_vdpzoom": {
+  "file": "ch07_vdpzoom.svg",
+  "png": "ch07_vdpzoom.png",
+  "script": "ch07_figs.py",
+  "wide": true
+ },
+ "ch08_canards": {
+  "file": "ch08_canards.svg",
+  "png": "ch08_canards.png",
+  "script": "ch08_figs.py",
+  "wide": true
+ },
+ "ch08_relaxation": {
+  "file": "ch08_relaxation.svg",
+  "png": "ch08_relaxation.png",
+  "script": "ch08_figs.py",
+  "wide": true
+ },
+ "ch08_slowmanifolds": {
+  "file": "ch08_slowmanifolds.svg",
+  "png": "ch08_slowmanifolds.png",
+  "script": "ch08_figs.py",
+  "wide": true
+ },
+ "ch08_vdpiso": {
+  "file": "ch08_vdpiso.svg",
+  "png": "ch08_vdpiso.png",
+  "script": "ch08_figs.py",
+  "wide": true
+ },
+ "ch08b_four": {
+  "file": "ch08b_four.svg",
+  "png": "ch08b_four.png",
+  "script": "ch08b_figs.py",
+  "wide": true
+ },
+ "ch08b_prc": {
+  "file": "ch08b_prc.svg",
+  "png": "ch08b_prc.png",
+  "script": "ch08b_figs.py",
+  "wide": true
+ },
+ "ch09_backward": {
+  "file": "ch09_backward.svg",
+  "png": "ch09_backward.png",
+  "script": "ch09_figs.py",
+  "wide": true
+ },
+ "ch09_bundle": {
+  "file": "ch09_bundle.svg",
+  "png": "ch09_bundle.png",
+  "script": "ch09_figs.py",
+  "wide": true
+ },
+ "ch09_sensitivity": {
+  "file": "ch09_sensitivity.svg",
+  "png": "ch09_sensitivity.png",
+  "script": "ch09_figs.py",
+  "wide": false
+ },
+ "ch10_continuation": {
+  "file": "ch10_continuation.svg",
+  "png": "ch10_continuation.png",
+  "script": "ch10_figs.py",
+  "wide": true
+ },
+ "ch10_mesh": {
+  "file": "ch10_mesh.svg",
+  "png": "ch10_mesh.png",
+  "script": "ch10_figs.py",
+  "wide": true
+ },
+ "ch10_step": {
+  "file": "ch10_step.svg",
+  "png": "ch10_step.png",
+  "script": "ch10_figs.py",
+  "wide": false
+ },
+ "ch11_grow": {
+  "file": "ch11_grow_still.png",
+  "gif": "ch11_grow.gif",
+  "script": "ch11_figs.py",
+  "still": "ch11_grow_still.png",
+  "wide": false
+ },
+ "ch11_segments": {
+  "file": "ch11_segments.svg",
+  "png": "ch11_segments.png",
+  "script": "ch11_figs.py",
+  "wide": false
+ },
+ "ch11_twist": {
+  "file": "ch11_twist.svg",
+  "png": "ch11_twist.png",
+  "script": "ch11_figs.py",
+  "wide": true
+ },
+ "ch11_validate": {
+  "file": "ch11_validate.svg",
+  "png": "ch11_validate.png",
+  "script": "ch11_figs.py",
+  "wide": false
+ },
+ "ch12_auto": {
+  "file": "ch12_auto.svg",
+  "png": "ch12_auto.png",
+  "script": "ch12_figs.py",
+  "wide": true
+ },
+ "ch12_phaseplane": {
+  "file": "ch12_phaseplane.svg",
+  "png": "ch12_phaseplane.png",
+  "script": "ch12_figs.py",
+  "wide": true
+ },
+ "ch12_reduction": {
+  "file": "ch12_reduction.svg",
+  "png": "ch12_reduction.png",
+  "script": "ch12_figs.py",
+  "wide": true
+ },
+ "ch12_timescales": {
+  "file": "ch12_timescales.svg",
+  "png": "ch12_timescales.png",
+  "script": "ch12_figs.py",
+  "wide": false
+ },
+ "ch13_arclength": {
+  "file": "ch13_arclength.svg",
+  "png": "ch13_arclength.png",
+  "script": "ch13_figs.py",
+  "wide": true
+ },
+ "ch13_basepoints": {
+  "file": "ch13_basepoints.svg",
+  "png": "ch13_basepoints.png",
+  "script": "ch13_figs.py",
+  "wide": false
+ },
+ "ch13_eqzoom": {
+  "file": "ch13_eqzoom.svg",
+  "png": "ch13_eqzoom.png",
+  "script": "ch13_figs.py",
+  "wide": true
+ },
+ "ch13_foliation": {
+  "file": "ch13_foliation_still.png",
+  "gif": "ch13_foliation.gif",
+  "script": "ch13_figs.py",
+  "still": "ch13_foliation_still.png",
+  "wide": false
+ },
+ "ch13_iso100": {
+  "file": "ch13_iso100.svg",
+  "png": "ch13_iso100.png",
+  "script": "ch13_figs.py",
+  "wide": true
+ },
+ "ch13_left": {
+  "file": "ch13_left.svg",
+  "png": "ch13_left.png",
+  "script": "ch13_figs.py",
+  "wide": true
+ },
+ "ch13_wide": {
+  "file": "ch13_wide.svg",
+  "png": "ch13_wide.png",
+  "script": "ch13_figs.py",
+  "wide": true
+ },
+ "ch14_fhn": {
+  "file": "ch14_fhn.svg",
+  "png": "ch14_fhn.png",
+  "script": "ch14_figs.py",
+  "wide": false
+ },
+ "ch14_fourier": {
+  "file": "ch14_fourier.svg",
+  "png": "ch14_fourier.png",
+  "script": "ch14_figs.py",
+  "wide": true
+ },
+ "ch14_prs": {
+  "file": "ch14_prs.svg",
+  "png": "ch14_prs.png",
+  "script": "ch14_figs.py",
+  "wide": true
+ },
+ "cover": {
+  "file": "cover.svg",
+  "png": "cover.png",
+  "script": "ch13_figs.py",
+  "wide": true
+ }
+}

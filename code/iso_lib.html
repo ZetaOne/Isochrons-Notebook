@@ -1,0 +1,1433 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>iso_lib.py · notebook</title>
+<meta name="description" content="notebook">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="../icon-32.png"><link rel="apple-touch-icon" href="../icon-192.png">
+<script>
+  // apply the saved display choices before the page is drawn (no flash of the wrong colours or size);
+  // new visitors get Funky 2 (Night Owl), 100 % text and the system font
+  (function () {
+    var d = document.documentElement, q = {}, DARK = {"system": null, "light": false, "dark": true, "midnight": true, "solarized-light": false, "solarized-dark": true, "nord": true, "dracula": true, "sepia": false, "contrast": true, "funky1": true, "funky2": true, "funky3": true}, FONTS = {"system": "", "serif": "", "atkinson": "https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap", "lexend": "https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap"}, SIZES = ["90", "100", "112", "125"];
+    function get(k) { try { return localStorage.getItem(k) } catch (e) { return null } }
+    try { new URLSearchParams(location.search).forEach(function (v, k) { q[k] = v }) } catch (e) {}
+    var t = q.theme || get('pyauto-xpp-theme') || 'light'; if (!(t in DARK)) t = 'light';
+    var z = q.textsize || get('pyauto-xpp-textsize') || '100'; if (SIZES.indexOf(z) < 0) z = '100';
+    var f = q.font || get('pyauto-xpp-font') || 'system'; if (!(f in FONTS)) f = 'system';
+    if (t !== 'system') d.dataset.theme = t;
+    d.dataset.textsize = z; d.dataset.font = f;
+    var dark = t === 'system' ? matchMedia('(prefers-color-scheme: dark)').matches : DARK[t];
+    d.dataset.code = dark ? 'dark' : 'light';
+    var ls = document.querySelectorAll('link[data-code]');
+    for (var i = 0; i < ls.length; i++) ls[i].media = ls[i].dataset.code === d.dataset.code ? 'all' : 'not all';
+    if (FONTS[f]) {
+      var l = document.createElement('link'); l.rel = 'stylesheet'; l.href = FONTS[f]; l.id = 'webfont-' + f;
+      document.head.appendChild(l);
+    }
+    window.PYX_DISPLAY = { theme: t, size: z, font: f, DARK: DARK, FONTS: FONTS, SIZES: SIZES };
+  })();
+</script>
+<link rel="stylesheet" data-code="dark" href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-vsc-dark-plus.min.css" integrity="sha512-ML8rkwYTFNcblPFx+VLgFIT2boa6f8DDP6p6go4+FT0/mJ8DCbCgi6S0UdjtzB3hKCr1zhU+YVB0AHhIloZP8Q==" crossorigin="anonymous" referrerpolicy="no-referrer"><link rel="stylesheet" data-code="light" href="https://cdnjs.cloudflare.com/ajax/libs/prism-themes/1.9.0/prism-vs.min.css" integrity="sha512-Jn4HzkCnzA7Bc+lbSQHAMeen0EhSTy71o9yJbXZtQx9VvozKVBV/2zfR3VyuDFIxGvHgbOMMNvb80l+jxFBC1Q==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<style>:root {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color-scheme: light dark;
+  --bg: #f4f4f2;
+  --fg: #1d1d1b;
+  --muted: #6b6b66;
+  --bar: #ffffff;
+  --line: #d8d8d2;
+  --desk: #5c6670;
+  --panel-bar: #e6e6e1;
+  --panel-bar-active: #d5dbe3;
+  --hint: #e8ebee;
+  --hint-muted: #c3cad1;
+  --accent: #2f5d8a;
+  --accent-fg: #ffffff;
+  --term-bg: #1b1c1e;
+  --term-head: #26282b;
+  --term-fg: #e4e4e0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --bg: #18191b;
+    --fg: #e6e6e3;
+    --muted: #9a9a95;
+    --bar: #222326;
+    --line: #34363a;
+    --desk: #2a3038;
+    --panel-bar: #34363a;
+    --panel-bar-active: #3d4652;
+    --accent: #4b7fb3;
+  }
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #18191b;
+  --fg: #e6e6e3;
+  --muted: #9a9a95;
+  --bar: #222326;
+  --line: #34363a;
+  --desk: #2a3038;
+  --panel-bar: #34363a;
+  --panel-bar-active: #3d4652;
+  --accent: #4b7fb3;
+}
+:root[data-theme='midnight'] {
+  color-scheme: dark;
+  --bg: #0b1426;
+  --fg: #dbe4f3;
+  --muted: #8ea0bf;
+  --bar: #101d36;
+  --line: #22355a;
+  --desk: #14274a;
+  --panel-bar: #1c3158;
+  --panel-bar-active: #26437a;
+  --hint: #dbe4f3;
+  --hint-muted: #8ea0bf;
+  --accent: #3d7bd9;
+  --term-bg: #08101f;
+  --term-head: #101d36;
+  --term-fg: #cfdcf2;
+}
+:root[data-theme='solarized-light'] {
+  color-scheme: light;
+  --bg: #fdf6e3;
+  --fg: #586e75;
+  --muted: #93a1a1;
+  --bar: #eee8d5;
+  --line: #d9d2bd;
+  --desk: #586e75;
+  --panel-bar: #eee8d5;
+  --panel-bar-active: #e4dcc3;
+  --hint: #fdf6e3;
+  --hint-muted: #eee8d5;
+  --accent: #268bd2;
+  --term-bg: #002b36;
+  --term-head: #073642;
+  --term-fg: #93a1a1;
+}
+:root[data-theme='solarized-dark'] {
+  color-scheme: dark;
+  --bg: #002b36;
+  --fg: #93a1a1;
+  --muted: #657b83;
+  --bar: #073642;
+  --line: #0f4a59;
+  --desk: #0a3a47;
+  --panel-bar: #073642;
+  --panel-bar-active: #0f4a59;
+  --hint: #93a1a1;
+  --hint-muted: #657b83;
+  --accent: #268bd2;
+  --term-bg: #001f27;
+  --term-head: #073642;
+  --term-fg: #93a1a1;
+}
+:root[data-theme='nord'] {
+  color-scheme: dark;
+  --bg: #2e3440;
+  --fg: #e5e9f0;
+  --muted: #a3acbd;
+  --bar: #3b4252;
+  --line: #4c566a;
+  --desk: #434c5e;
+  --panel-bar: #3b4252;
+  --panel-bar-active: #4c566a;
+  --hint: #eceff4;
+  --hint-muted: #d8dee9;
+  --accent: #5e81ac;
+  --term-bg: #242933;
+  --term-head: #2e3440;
+  --term-fg: #d8dee9;
+}
+:root[data-theme='dracula'] {
+  color-scheme: dark;
+  --bg: #21222c;
+  --fg: #f8f8f2;
+  --muted: #a4a7c4;
+  --bar: #282a36;
+  --line: #44475a;
+  --desk: #343746;
+  --panel-bar: #44475a;
+  --panel-bar-active: #6272a4;
+  --hint: #f8f8f2;
+  --hint-muted: #bd93f9;
+  --accent: #bd93f9;
+  --accent-fg: #21222c;
+  --term-bg: #191a21;
+  --term-head: #282a36;
+  --term-fg: #f8f8f2;
+}
+:root[data-theme='sepia'] {
+  color-scheme: light;
+  --bg: #f4ecd8;
+  --fg: #4b3b2a;
+  --muted: #8a7558;
+  --bar: #faf4e6;
+  --line: #ddcfb0;
+  --desk: #7a6344;
+  --panel-bar: #ebdfc4;
+  --panel-bar-active: #dccaa3;
+  --hint: #faf4e6;
+  --hint-muted: #f1e6cc;
+  --accent: #8b5a2b;
+  --term-bg: #2b2117;
+  --term-head: #3a2d20;
+  --term-fg: #eadcc3;
+}
+:root[data-theme='contrast'] {
+  color-scheme: dark;
+  --bg: #000000;
+  --fg: #ffffff;
+  --muted: #e0e0e0;
+  --bar: #000000;
+  --line: #ffffff;
+  --desk: #000000;
+  --panel-bar: #000000;
+  --panel-bar-active: #1a1a1a;
+  --hint: #ffffff;
+  --hint-muted: #ffff00;
+  --accent: #ffff00;
+  --accent-fg: #000000;
+  --term-bg: #000000;
+  --term-head: #000000;
+  --term-fg: #ffffff;
+}
+/* Fairy Floss, github.com/sailorhg/fairyfloss (MIT): palette on the page around XPP, with a glow behind the windows */
+:root[data-theme='funky1'] {
+  color-scheme: dark;
+  --bg: #4a4466;
+  --fg: #f8f8f2;
+  --muted: #cbc4e6;
+  --bar: #5a5475;
+  --line: #716799;
+  --desk: radial-gradient(circle at 12% 18%, #ffb8d155 0, transparent 42%),
+    radial-gradient(circle at 88% 28%, #c2ffdf50 0, transparent 42%),
+    radial-gradient(circle at 50% 100%, #c5a3ff48 0, transparent 50%),
+    #5a5475;
+  --panel-bar: #716799;
+  --panel-bar-active: #8077a8;
+  --hint: #f8f8f2;
+  --hint-muted: #fff352;
+  --accent: #ffb8d1;
+  --accent-fg: #3f3a56;
+  --term-bg: #3f3a56;
+  --term-head: #4a4466;
+  --term-fg: #f8f8f2;
+  --stripe: linear-gradient(90deg, #ffb8d1, #c5a3ff, #c2ffdf, #fff352, #ff857f);
+}
+/* Night Owl, github.com/sdras/night-owl-vscode-theme (MIT): palette on the page around XPP, with a glow behind the windows */
+:root[data-theme='funky2'] {
+  color-scheme: dark;
+  --bg: #01111d;
+  --fg: #d6deeb;
+  --muted: #7e97ac;
+  --bar: #011627;
+  --line: #1d3b53;
+  --desk: radial-gradient(circle at 12% 18%, #82aaff55 0, transparent 42%),
+    radial-gradient(circle at 88% 28%, #c792ea50 0, transparent 42%),
+    radial-gradient(circle at 50% 100%, #addb6748 0, transparent 50%),
+    #011627;
+  --panel-bar: #0b2942;
+  --panel-bar-active: #1d3b53;
+  --hint: #d6deeb;
+  --hint-muted: #7fdbca;
+  --accent: #82aaff;
+  --accent-fg: #011627;
+  --term-bg: #010e1a;
+  --term-head: #01111d;
+  --term-fg: #d6deeb;
+  --stripe: linear-gradient(90deg, #82aaff, #c792ea, #7fdbca, #addb67, #f78c6c);
+}
+/* Synthwave '84, github.com/robb0wen/synthwave-vscode (MIT): palette on the page around XPP, with a glow behind the windows */
+:root[data-theme='funky3'] {
+  color-scheme: dark;
+  --bg: #1e1a2b;
+  --fg: #ffffff;
+  --muted: #b6b1d0;
+  --bar: #241b2f;
+  --line: #463465;
+  --desk: radial-gradient(circle at 12% 18%, #ff7edb55 0, transparent 42%),
+    radial-gradient(circle at 88% 28%, #36f9f650 0, transparent 42%),
+    radial-gradient(circle at 50% 100%, #fede5d48 0, transparent 50%),
+    #262335;
+  --panel-bar: #34294f;
+  --panel-bar-active: #463465;
+  --hint: #ffffff;
+  --hint-muted: #fede5d;
+  --accent: #ff7edb;
+  --accent-fg: #241b2f;
+  --term-bg: #171520;
+  --term-head: #241b2f;
+  --term-fg: #f4eee4;
+  --stripe: linear-gradient(90deg, #ff7edb, #36f9f6, #fede5d, #f97e72, #72f1b8);
+}
+
+/* ---- toolbar and menus (shared by the main page and the manual) ------------- */
+* { box-sizing: border-box }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px }
+.skip { position: absolute; left: -999px; top: 8px; z-index: 40; padding: 8px 12px; background: var(--bar); color: var(--fg); border: 1px solid var(--line); border-radius: 4px }
+.skip:focus { left: 8px }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap }
+.bar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 16px; padding: 6px 12px;
+       min-height: 48px; background: var(--bar); border-bottom: 1px solid var(--line); font-size: .875rem }
+/* funky themes: a multi-coloured stripe under the toolbar (as XPPAUT-Web) */
+:root[data-theme^='funky'] .bar { border-bottom: 3px solid transparent; border-image: var(--stripe) 1 }
+.brand { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; font-weight: 600; color: var(--fg); text-decoration: none; white-space: nowrap }
+.brand img { width: 22px; height: 22px; border-radius: 5px; flex: none }
+.right { margin-left: auto; display: flex; align-items: center; gap: 10px }
+.bar details { position: relative }
+.bar summary { list-style: none } .bar summary::-webkit-details-marker { display: none }
+.round { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid var(--line); flex: none;
+       border-radius: 50%; background: var(--bg); color: var(--fg); cursor: pointer }
+.round:hover, details[open] > summary.round { background: var(--panel-bar-active) }
+.panel { position: absolute; z-index: 100; top: calc(100% + 6px); right: 0; display: grid; gap: 2px; min-width: 220px;
+       max-height: calc(100vh - 70px); overflow: auto; padding: 6px; background: var(--bar); border: 1px solid var(--line);
+       border-radius: 6px; box-shadow: 0 6px 20px rgb(0 0 0 / 0.25) }
+.panel button, .panel a { display: flex; align-items: center; gap: 10px; width: 100%; padding: 6px 8px; border: 0; border-radius: 4px;
+       background: transparent; color: var(--fg); font: inherit; text-align: left; text-decoration: none; cursor: pointer }
+.panel button:hover, .panel a:hover, .panel button[aria-checked='true'] { background: var(--panel-bar-active) }
+.panel .head { padding: 4px 8px 2px; font-size: .75rem; color: var(--muted) }
+.swatch { display: inline-flex; width: 34px; height: 18px; overflow: hidden; border: 1px solid rgb(127 127 127 / 0.5); border-radius: 3px; flex: none }
+.swatch i { flex: 1 }
+@media (pointer: coarse) {
+  .panel button, .panel a { min-height: 44px }
+  .round { width: 40px; height: 40px }
+}
+
+
+/* ---- display: text size and font (see DISPLAY_* in make_site.py) ------------ */
+/* XPPAUT-Web's theme sets 14px on :root; here 1rem is the reader's text size */
+:root { font-size: 100%; --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+        --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif }
+:root[data-textsize='90'] { font-size: 90% }
+:root[data-textsize='112'] { font-size: 112% }
+:root[data-textsize='125'] { font-size: 125% }
+:root[data-font='serif'] { --font-body: Charter, 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif }
+:root[data-font='atkinson'] { --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif }
+:root[data-font='lexend'] { --font-body: 'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif }
+body { font-family: var(--font-body) }
+code, pre, kbd, samp { font-family: var(--font-mono) }
+/* the panel */
+.dpanel { width: min(300px, calc(100vw - 24px)); gap: 0 }
+.dpanel .head { padding: 8px 8px 4px; font-weight: 600 }
+.dpanel .head:first-child { padding-top: 2px }
+.dpanel .grp { display: grid; gap: 2px }
+.dpanel .sep { height: 1px; margin: 6px 2px 0; background: var(--line) }
+.dpanel .seg { grid-template-columns: repeat(4, 1fr); gap: 4px; padding: 0 2px }
+.dpanel .seg button { flex-direction: column; justify-content: center; gap: 0; padding: 4px 0; border: 1px solid var(--line); text-align: center }
+.dpanel .seg button[aria-checked='true'] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent) }
+.dpanel .seg b { line-height: 1.15 }
+.dpanel .seg small { font-size: .6875rem; color: var(--muted) }
+.dpanel .fontlist button[aria-checked='true'], .dpanel .themelist button[aria-checked='true'] { box-shadow: inset 3px 0 0 var(--accent) }
+.dpanel .fontlist span { flex: 1 }
+.dpanel .fontlist small { color: var(--muted); font-size: .75rem; font-family: var(--font-body) }
+
+
+html { scroll-behavior: smooth }
+body { margin: 0; background: var(--bg); color: var(--fg); line-height: 1.55 }
+a { color: var(--accent) }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px }
+.nav { display: flex; gap: 2px }
+.nav a { padding: 8px 10px; border-radius: 6px; color: var(--fg); text-decoration: none }
+.nav a:hover { background: var(--panel-bar-active) }
+.menu { display: none }
+h1, h2, h3 { line-height: 1.2 }
+h2 { font-size: 1.5rem; margin: 2.2rem 0 .4rem }
+.lead { color: var(--muted); margin: 0 0 1rem; max-width: 60rem }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 8px; border: 1px solid var(--accent);
+       background: var(--accent); color: var(--accent-fg); font-weight: 600; text-decoration: none; font-size: .9375rem; cursor: pointer }
+.btn.ghost { background: transparent; color: var(--fg); border-color: var(--line) }
+.btn.ghost:hover { border-color: var(--accent) }
+.btn small { font-weight: 400; opacity: .8 }
+.tag { display: inline-block; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); font-size: .75rem;
+       color: var(--muted); text-decoration: none; white-space: nowrap }
+a.tag:hover { border-color: var(--accent); color: var(--fg) }
+.fig-bg { background: #fff; border-radius: 8px }
+footer { margin-top: 48px; padding: 22px 0 30px; border-top: 1px solid var(--line); background: var(--bar);
+         font-size: .84375rem; color: var(--muted) }
+footer a { color: var(--fg) }
+@media (max-width: 760px) {
+  .nav { display: none }
+  .menu { display: block }
+}
+
+
+:root[data-code='dark'] { --cb-bg: #1e1e1e; --cb-head: #252526; --cb-headfg: #c5c5c5; --cb-line: #3c3c3c; --cb-fg: #d4d4d4; --cb-num: #6e7681 }
+:root[data-code='light'] { --cb-bg: #ffffff; --cb-head: #f3f3f3; --cb-headfg: #5c5c5c; --cb-line: #dcdcdc; --cb-fg: #1f1f1f; --cb-num: #9a9a9a }
+.cb { margin: 1em 0 1.3em; border: 1px solid var(--cb-line); border-radius: 8px; overflow: hidden; background: var(--cb-bg) }
+.cb-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 32px; padding: 0 6px 0 12px;
+       background: var(--cb-head); color: var(--cb-headfg); border-bottom: 1px solid var(--cb-line); font-size: .75rem }
+.cb-head button, .cb-head a { font: inherit; color: inherit; background: transparent; border: 1px solid var(--cb-line); border-radius: 5px;
+       padding: 3px 9px; cursor: pointer; text-decoration: none }
+.cb-body { display: grid; grid-template-columns: auto 1fr; overflow-x: auto }
+.cb pre { margin: 0; padding: 12px 14px; font: .8125rem/1.55 var(--font-mono); background: transparent !important; color: var(--cb-fg);
+       tab-size: 4; overflow: visible }
+.cb pre code { font: inherit; background: transparent !important; text-shadow: none }
+.cb pre.ln { color: var(--cb-num); text-align: right; user-select: none; padding-right: 10px; border-right: 1px solid var(--cb-line) }
+.cb.out { background: color-mix(in srgb, var(--cb-bg) 94%, var(--fg)) }
+.cb.out pre { white-space: pre-wrap }
+.doc { max-width: 52rem }
+.doc img { max-width: 100%; background: #fff; border-radius: 6px }
+.doc table { border-collapse: collapse; margin: 1em 0; font-size: .9375rem }
+.doc th, .doc td { border: 1px solid var(--line); padding: 4px 10px; text-align: left; vertical-align: top }
+.doc code { font-size: .875em; background: color-mix(in srgb, var(--fg) 8%, transparent); padding: 1px 4px; border-radius: 4px }
+.doc pre code { background: transparent; padding: 0 }
+.doc blockquote { margin: 1em 0; padding: .2em 1em; border-left: 3px solid var(--accent); color: var(--muted) }
+.crumbs { font-size: .875rem; color: var(--muted); margin: 18px 0 0 }
+.crumbs a { color: var(--muted) }
+.pagehead h1 { font-size: 1.75rem; margin: .3rem 0 .4rem; font-family: var(--font-mono) }
+.pagehead h1.prose { font-family: inherit }
+.pagehead p { margin: .2rem 0 .6rem; color: var(--muted); max-width: 52rem }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: .6rem 0 }
+.figs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin: 1rem 0 }
+.figs a { display: block; background: #fff; border-radius: 8px; border: 1px solid var(--line); overflow: hidden }
+.figs img { width: 100%; display: block }
+.cell-md { margin: 1.2rem 0 }
+.cell-n { font: .6875rem var(--font-mono); color: var(--muted); margin: 1rem 0 -.6rem }
+.cell-img { max-width: 100%; background: #fff; border-radius: 6px; display: block; margin: .4rem 0 1rem }
+.flist { list-style: none; padding: 0; display: grid; gap: 8px }
+.flist li { display: grid; grid-template-columns: minmax(12rem, auto) 1fr; gap: 4px 14px; padding: 10px 12px; background: var(--bar);
+            border: 1px solid var(--line); border-radius: 8px }
+.flist li a { font-family: var(--font-mono); font-weight: 600 }
+.flist li span { color: var(--muted) }
+@media (max-width: 760px) { .flist li { grid-template-columns: 1fr } }
+</style>
+
+</head><body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="bar">
+  <a class="brand" href="../index.html"><img src="../icon-192.png" alt="" width="22" height="22">notebook</a>
+  <nav class="nav" aria-label="Sections"><a href="../index.html#book">Book</a><a href="../index.html#chapters">Chapters</a><a href="../index.html#study">Study kit</a><a href="../code/index.html">Code</a><a href="../index.html#highlights">My highlights</a></nav>
+  <div class="right">
+    <details class="display" id="themes">
+      <summary class="round" title="Display: theme, text size, font" aria-label="Display: theme, text size and font">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none"
+          stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+      </summary>
+      <div class="panel dpanel" id="displaypanel" role="group" aria-label="Display">
+        <div class="head" id="dh-size">Text size</div>
+        <div class="grp seg" id="sizelist" role="radiogroup" aria-labelledby="dh-size"></div>
+        <div class="sep"></div>
+        <div class="head" id="dh-font">Font</div>
+        <div class="grp fontlist" id="fontlist" role="radiogroup" aria-labelledby="dh-font"></div>
+        <div class="sep"></div>
+        <div class="head" id="dh-theme">Theme (as XPPAUT-Web)</div>
+        <div class="grp themelist" id="themelist" role="radiogroup" aria-labelledby="dh-theme"></div>
+      </div>
+    </details>
+    <details class="menu"><summary class="round" aria-label="Menu" title="Menu"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></summary>
+      <div class="panel" role="menu"><a role="menuitem" href="../index.html#book">Book</a><a role="menuitem" href="../index.html#chapters">Chapters</a><a role="menuitem" href="../index.html#study">Study kit</a><a role="menuitem" href="../code/index.html">Code</a><a role="menuitem" href="../index.html#highlights">My highlights</a><a role="menuitem" href="https://sites.me.ucsb.edu/~moehlis/moehlis_papers/isochrons.pdf" target="_blank" rel="noopener">The paper (PDF)</a></div></details>
+  </div>
+</header>
+<main id="main">
+<div class="wrap">
+<p class="crumbs"><a href="../index.html">Library</a> / <a href="index.html">Code</a> / iso_lib.py</p>
+<div class="pagehead"><h1>iso_lib.py</h1><p></p>
+<div class="row">
+<a class="btn ghost" href="raw/iso_lib.py" download>Download</a></div></div>
+<div class="cb"><div class="cb-head"><span>iso_lib.py &middot; 438 lines</span><span class="row" style="margin:0"><button type="button" class="cb-copy">Copy</button><a href="raw/iso_lib.py" download>Download</a></span></div><div class="cb-body"><pre class="ln" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438</pre><pre><code class="language-python">&quot;&quot;&quot;Shared numerics for the isochron book.
+
+Every trajectory is computed by XPPAUT through pyauto-xpp (``import pyxpp``):
+time integration (CVODE, tolerances 1e-10), equilibria, nullclines, periodic
+orbits (Initialconds &gt; Periodic), adjoints (nUmerics &gt; Averaging) and AUTO.
+Only the boundary-value continuation of chapter 11 uses scipy&#x27;s collocation
+solver (``solve_bvp``), because that is the paper&#x27;s own method and XPP&#x27;s AUTO
+does not expose general boundary-value continuation from Python.
+
+Models (``MODELS``):
+  sl      Stuart-Landau with twist:  r&#x27; = r(1 - r^2),  th&#x27; = w - b r^2
+          (b = 0 is Winfree&#x27;s &quot;radial isochron clock&quot;)
+  sl2     two cycles: r&#x27; = r(r^2 - a^2)(1 - r^2), th&#x27; = w - b r^2
+          (unstable cycle r = a is the basin boundary of the stable cycle r = 1)
+  vdp     van der Pol in Lienard form:  x&#x27; = (y - x^3/3 + x)/eps,  y&#x27; = -x
+  fhn     FitzHugh-Nagumo:  v&#x27; = v - v^3/3 - w + I,  w&#x27; = eps (v + a - b w)
+  ml      Morris-Lecar (SNIC parameter set, iapp = 0.1)
+  rhh     reduced Hodgkin-Huxley, Osinga &amp; Moehlis (2010) eq. (4.1)
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import multiprocessing as mp
+import os
+import re
+from pathlib import Path
+
+import numpy as np
+
+import pyxpp
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+OUT = ROOT / &quot;rendered-anims&quot; / &quot;isochron&quot;
+DATA = OUT / &quot;data&quot;
+DATA.mkdir(parents=True, exist_ok=True)
+
+NUMERICS = &quot;@ meth=cvode,tol=1e-10,atol=1e-10,dt=0.01,maxstor=400000,bound=100000\n&quot;
+
+MODELS = {
+    &quot;sl&quot;: &quot;&quot;&quot;# Stuart-Landau oscillator with twist b (b=0: radial isochron clock)
+x&#x27;=x*(1-x^2-y^2)-y*(w-b*(x^2+y^2))
+y&#x27;=y*(1-x^2-y^2)+x*(w-b*(x^2+y^2))
+par w=1.0,b=0.0
+init x=0.5,y=0
+&quot;&quot;&quot;,
+    &quot;sl2&quot;: &quot;&quot;&quot;# two concentric cycles: unstable r=a, stable r=1
+f(r)=(r*r-a*a)*(1-r*r)
+x&#x27;=x*f(sqrt(x^2+y^2))-y*(w-b*(x^2+y^2))
+y&#x27;=y*f(sqrt(x^2+y^2))+x*(w-b*(x^2+y^2))
+par w=1.0,b=0.5,a=0.5
+init x=0.8,y=0
+&quot;&quot;&quot;,
+    &quot;vdp&quot;: &quot;&quot;&quot;# van der Pol oscillator, Lienard form
+x&#x27;=(y-x^3/3+x)/eps
+y&#x27;=-x
+par eps=0.1
+init x=2,y=0
+&quot;&quot;&quot;,
+    &quot;fhn&quot;: &quot;&quot;&quot;# FitzHugh-Nagumo
+v&#x27;=v-v^3/3-w+i
+w&#x27;=eps*(v+a-b*w)
+par i=0.5,a=0.7,b=0.8,eps=0.08
+init v=-1,w=-0.5
+&quot;&quot;&quot;,
+    &quot;ml&quot;: &quot;&quot;&quot;# Morris-Lecar (Rinzel &amp; Ermentrout&#x27;s dimensionless form, SNIC parameter set)
+par iapp=0.1,phi=0.333,v1=-0.01,v2=0.15,v3=0.1,v4=0.145,gca=1,vk=-0.7,vl=-0.5,gk=2.0,gl=0.5
+minf(v)=0.5*(1+tanh((v-v1)/v2))
+ninf(v)=0.5*(1+tanh((v-v3)/v4))
+lamn(v)=phi*cosh((v-v3)/(2*v4))
+v&#x27;=iapp+gl*(vl-v)+gk*w*(vk-v)-gca*minf(v)*(v-1)
+w&#x27;=lamn(v)*(ninf(v)-w)
+init v=-0.3,w=0
+&quot;&quot;&quot;,
+    &quot;rhh&quot;: &quot;&quot;&quot;# Reduced Hodgkin-Huxley model, Osinga &amp; Moehlis (2010) eq. (4.1)
+par iapp=10,gna=120,gk=36,gl=0.3,vna=50,vk=-77,vl=-54.4,c=1
+an(v)=0.01*(v+55)/(1-exp(-(v+55)/10))
+bn(v)=0.125*exp(-(v+65)/80)
+am(v)=0.1*(v+40)/(1-exp(-(v+40)/10))
+bm(v)=4*exp(-(v+65)/18)
+minf(v)=am(v)/(am(v)+bm(v))
+v&#x27;=(iapp-gna*minf(v)^3*(0.8-n)*(v-vna)-gk*n^4*(v-vk)-gl*(v-vl))/c
+n&#x27;=an(v)*(1-n)-bn(v)*n
+init v=-60,n=0.4
+&quot;&quot;&quot;,
+}
+
+# Python versions of the right-hand sides (for scipy collocation and Jacobians)
+def rhs_np(name, pars):
+    p = dict(pars)
+    if name == &quot;sl&quot;:
+        w, b = p.get(&quot;w&quot;, 1.0), p.get(&quot;b&quot;, 0.0)
+        def F(u):
+            x, y = u[0], u[1]; r2 = x * x + y * y
+            return np.array([x * (1 - r2) - y * (w - b * r2), y * (1 - r2) + x * (w - b * r2)])
+        return F
+    if name == &quot;vdp&quot;:
+        eps = p.get(&quot;eps&quot;, 0.1)
+        return lambda u: np.array([(u[1] - u[0] ** 3 / 3 + u[0]) / eps, -u[0]])
+    if name == &quot;fhn&quot;:
+        I, a, b, eps = p.get(&quot;i&quot;, 0.5), p.get(&quot;a&quot;, 0.7), p.get(&quot;b&quot;, 0.8), p.get(&quot;eps&quot;, 0.08)
+        return lambda u: np.array([u[0] - u[0] ** 3 / 3 - u[1] + I, eps * (u[0] + a - b * u[1])])
+    if name == &quot;ml&quot;:
+        q = dict(iapp=0.1, phi=0.333, v1=-0.01, v2=0.15, v3=0.1, v4=0.145, gca=1, vk=-0.7, vl=-0.5, gk=2.0, gl=0.5); q.update(p)
+        def F(u):
+            v, w = u[0], u[1]
+            mi = 0.5 * (1 + np.tanh((v - q[&quot;v1&quot;]) / q[&quot;v2&quot;])); ni = 0.5 * (1 + np.tanh((v - q[&quot;v3&quot;]) / q[&quot;v4&quot;]))
+            ln = q[&quot;phi&quot;] * np.cosh((v - q[&quot;v3&quot;]) / (2 * q[&quot;v4&quot;]))
+            return np.array([q[&quot;iapp&quot;] + q[&quot;gl&quot;] * (q[&quot;vl&quot;] - v) + q[&quot;gk&quot;] * w * (q[&quot;vk&quot;] - v) - q[&quot;gca&quot;] * mi * (v - 1),
+                             ln * (ni - w)])
+        return F
+    if name == &quot;rhh&quot;:
+        q = dict(iapp=10, gna=120, gk=36, gl=0.3, vna=50, vk=-77, vl=-54.4, c=1); q.update(p)
+        def F(u):
+            v, n = u[0], u[1]
+            an = 0.01 * (v + 55) / (1 - np.exp(-(v + 55) / 10))
+            bn = 0.125 * np.exp(-(v + 65) / 80)
+            am = 0.1 * (v + 40) / (1 - np.exp(-(v + 40) / 10))
+            bm = 4 * np.exp(-(v + 65) / 18)
+            mi = am / (am + bm)
+            dv = (q[&quot;iapp&quot;] - q[&quot;gna&quot;] * mi ** 3 * (0.8 - n) * (v - q[&quot;vna&quot;])
+                  - q[&quot;gk&quot;] * n ** 4 * (v - q[&quot;vk&quot;]) - q[&quot;gl&quot;] * (v - q[&quot;vl&quot;])) / q[&quot;c&quot;]
+            return np.array([dv, an * (1 - n) - bn * n])
+        return F
+    raise KeyError(name)
+
+
+def load(name, extra=&quot;&quot;, **pars):
+    &quot;&quot;&quot;Load a model into its own XPP instance; ``pars`` override parameters.&quot;&quot;&quot;
+    m = pyxpp.load(text=MODELS[name] + NUMERICS + extra + &quot;done\n&quot;)
+    if pars:
+        m.set(**pars)
+    return m
+
+
+def xy_names(m):
+    return [v.lower() for v in m.vars[:2]]
+
+
+def traj(m, x0, total, dt=0.01, back=False, **pars):
+    &quot;&quot;&quot;One trajectory from x0 (sequence) for time ``total``; returns (t, X) with X shape (N, 2).&quot;&quot;&quot;
+    a, b = xy_names(m)
+    m.set(**{a: float(x0[0]), b: float(x0[1])}, total=abs(total), dt=dt, trans=0, nout=1, **pars)
+    if back:
+        m.buttons.initialconds.backward()
+        tr = m.data
+    else:
+        tr = m.run()
+    return np.asarray(tr.t, float), np.column_stack([tr[a], tr[b]]).astype(float)
+
+
+def periodic_orbit(m, x0, var=None, settle=400.0, dt=0.002):
+    &quot;&quot;&quot;Settle onto the stable cycle from x0, then XPP&#x27;s Initialconds &gt; Periodic:
+    exactly one period starting at the maximum of ``var`` (the paper&#x27;s gamma_0).
+    Returns (t, X, T).&quot;&quot;&quot;
+    a, b = xy_names(m)
+    var = var or a
+    m.set(**{a: float(x0[0]), b: float(x0[1])}, total=settle, dt=dt, trans=0, nout=1)
+    m.run()
+    m.buttons.xi_vs_t(var)
+    m.buttons.initialconds.periodic()
+    T = float(m.numerics[&quot;total&quot;])
+    # re-integrate one full period from gamma_0 with a step that divides T
+    g0 = m.data.array[0, 1:3].astype(float)
+    nstep = int(np.ceil(T / dt))
+    m.set(**{a: g0[0], b: g0[1]}, total=T, dt=T / nstep, trans=0, nout=1)
+    tr = m.run()
+    X = np.column_stack([tr[a], tr[b]]).astype(float)
+    return np.asarray(tr.t, float), X, T
+
+
+def floquet(m):
+    &quot;&quot;&quot;Nontrivial Floquet exponent kappa and multiplier exp(kappa T) of the orbit
+    that Initialconds &gt; Periodic left in the browser (nUmerics &gt; Averaging).&quot;&quot;&quot;
+    n = len(m.log)
+    m.buttons.numerics.averaging.new_adj()
+    adj = m.data
+    txt = m.log[n:]
+    mk = re.search(r&quot;kappa\s*=\s*([-+0-9.eE]+)&quot;, txt)
+    mn = re.search(r&quot;nu = exp\(kappa T\)\s*=\s*([-+0-9.eE]+)&quot;, txt)
+    kap = float(mk.group(1)) if mk else None          # None: multiplier numerically zero
+    nu = float(mn.group(1)) if mn else 0.0
+    return kap, nu, adj
+
+
+class PhaseLookup:
+    &quot;&quot;&quot;Phase of a point on (or very near) the cycle, from one densely sampled period.&quot;&quot;&quot;
+
+    def __init__(self, X, scale=(1.0, 1.0)):
+        self.X = np.asarray(X, float)
+        self.s = np.asarray(scale, float)
+        self.N = len(X) - 1                     # last point = first point (one full period)
+
+    def __call__(self, p):
+        Y = (self.X[:-1] - p) / self.s
+        k = int(np.argmin((Y ** 2).sum(1)))
+        best = (k, 0.0, np.inf)
+        for j in (k - 1, k):                    # refine on the two neighbouring segments
+            j %= self.N
+            A, B = self.X[j] / self.s, self.X[j + 1] / self.s
+            d = B - A
+            u = np.clip(np.dot(p / self.s - A, d) / max(np.dot(d, d), 1e-300), 0, 1)
+            dist = np.linalg.norm(A + u * d - p / self.s)
+            if dist &lt; best[2]:
+                best = (j, u, dist)
+        j, u, dist = best
+        return ((j + u) / self.N) % 1.0, dist
+
+
+# ---------------------------------------------------------------- phase maps
+_W = {}
+
+
+def _init_worker(name, pars, X, scale):
+    _W[&quot;m&quot;] = load(name, **pars)
+    _W[&quot;m&quot;].set(maxstor=5000)
+    _W[&quot;look&quot;] = PhaseLookup(X, scale)
+
+
+def _phase_of(args):
+    x0, T, nper, tol, maxper = args
+    m, look = _W[&quot;m&quot;], _W[&quot;look&quot;]
+    a, b = xy_names(m)
+    m.set(**{a: float(x0[0]), b: float(x0[1])})
+    done = 0
+    while True:
+        dt = T / 1000.0                          # whole periods end exactly on a step
+        m.set(total=nper * T, trans=nper * T - 5 * dt, nout=1, dt=dt)
+        m.run() if done == 0 else m.run_last()
+        done += nper
+        p = np.array(list(m.last_point().values())[:2], float)
+        if not np.all(np.isfinite(p)):
+            return np.nan, np.nan, done
+        th, dist = look(p)
+        if dist &lt; tol or done &gt;= maxper:
+            return (th if dist &lt; 10 * tol else np.nan), dist, done
+
+
+def phase_map(name, pars, X, T, xs, ys, scale=(1, 1), nper=3, tol=1e-4, maxper=60, procs=6):
+    &quot;&quot;&quot;Asymptotic phase on the grid xs x ys: integrate whole periods with XPP
+    until the point is within ``tol`` (in scaled units) of the cycle, then read
+    its phase off the cycle.  Returns theta[j, i] in [0, 1) (NaN = no phase).&quot;&quot;&quot;
+    pts = [(x, y) for y in ys for x in xs]
+    jobs = [((x, y), T, nper, tol, maxper) for (x, y) in pts]
+    ctx = mp.get_context(&quot;spawn&quot;)
+    with ctx.Pool(procs, initializer=_init_worker, initargs=(name, pars, X, scale)) as pool:
+        res = pool.map(_phase_of, jobs, chunksize=64)
+    th = np.array([r[0] for r in res]).reshape(len(ys), len(xs))
+    nper_used = np.array([r[2] for r in res]).reshape(len(ys), len(xs))
+    return th, nper_used
+
+
+def isochron_curves(xs, ys, th, levels):
+    &quot;&quot;&quot;Extract isochrons {theta = c} from a phase map as polylines, using the
+    zero set of sin(2 pi (theta - c)) on the branch where cos &gt; 0.&quot;&quot;&quot;
+    import matplotlib
+    matplotlib.use(&quot;Agg&quot;)
+    import matplotlib.pyplot as plt
+    out = {}
+    fig, ax = plt.subplots()
+    for c in levels:
+        s = np.sin(2 * np.pi * (th - c))
+        co = np.cos(2 * np.pi * (th - c))
+        cs = ax.contour(xs, ys, s, levels=[0.0])
+        segs = []
+        for path in cs.allsegs[0]:
+            if len(path) &lt; 2:
+                continue
+            # keep the pieces where cos &gt; 0 (theta = c, not c + 1/2)
+            ii = np.clip(np.searchsorted(xs, path[:, 0]), 1, len(xs) - 1)
+            jj = np.clip(np.searchsorted(ys, path[:, 1]), 1, len(ys) - 1)
+            good = co[jj, ii] &gt; 0
+            cur = []
+            for p, g in zip(path, good):
+                if g:
+                    cur.append(p)
+                elif len(cur) &gt; 1:
+                    segs.append(np.array(cur)); cur = []
+                else:
+                    cur = []
+            if len(cur) &gt; 1:
+                segs.append(np.array(cur))
+        out[c] = segs
+        cs.remove()
+    plt.close(fig)
+    return out
+
+
+# ------------------------------------------------- BVP continuation (ch. 11)
+def jac_fd(F, u, h=1e-7):
+    n = len(u); J = np.zeros((n, n)); f0 = F(u)
+    for i in range(n):
+        e = np.zeros(n); e[i] = h * max(1.0, abs(u[i]))
+        J[:, i] = (F(u + e) - f0) / e[i]
+    return J
+
+
+def monodromy(F, gamma0, T, steps=20000):
+    &quot;&quot;&quot;D Phi_T(gamma0) by RK4 on the variational equation (used only to get the
+    stable Floquet vector for the linear approximation of the isochron).&quot;&quot;&quot;
+    def G(z):
+        u, M = z[:2], z[2:].reshape(2, 2)
+        return np.concatenate([F(u), (jac_fd(F, u) @ M).ravel()])
+    z = np.concatenate([gamma0, np.eye(2).ravel()]); h = T / steps
+    for _ in range(steps):
+        k1 = G(z); k2 = G(z + h / 2 * k1); k3 = G(z + h / 2 * k2); k4 = G(z + h * k3)
+        z = z + h / 6 * (k1 + 2 * k2 + 2 * k3 + k4)
+    return z[2:].reshape(2, 2)
+
+
+def isochron_bvp(F, orbit_t, orbit_X, T, vs, eta=1e-3, h=None, arclen=1.0, kmax=6,
+                 side=+1, scale=(1.0, 1.0), tol=1e-8, max_nodes=200000, verbose=False,
+                 hmax=0.01, record=None):
+    &quot;&quot;&quot;The Osinga-Moehlis method: grow the isochron of gamma_0 = orbit_X[0] by
+    continuing orbit segments u(s), 0 &lt;= s &lt;= 1, of  u&#x27; = k T F(u)  whose end
+    point u(1) lies on the linear approximation L_eta = {gamma_0 + delta vs}.
+    The start point u(0) traces the isochron.  Continuation is in arclength of
+    u(0) (a pseudo-arclength condition on u(0)); when |delta| reaches eta the
+    segment is extended by one more period (k -&gt; k+1) by concatenating the last
+    segment with one period of the orbit, as in section 3 of the paper.
+    Returns the isochron as an array of points (scaled units are only used for
+    the step length).  With record=n, also returns every n-th orbit segment as
+    (k, delta, s-mesh, u) tuples: (points, segments).&quot;&quot;&quot;
+    from scipy.integrate import solve_bvp
+    g0 = orbit_X[0].astype(float)
+    vs = np.real(np.asarray(vs)).astype(float); vs = vs / np.linalg.norm(vs) * side
+    nrm = np.array([-vs[1], vs[0]])                  # normal to L_eta
+    sc = np.asarray(scale, float)
+    h = h or hmax / 10
+
+    # Gamma as a function of s in [0, 1] (one period)
+    s_orb = orbit_t / T
+
+    def gamma_of(s):
+        return np.vstack([np.interp(s, s_orb, orbit_X[:, i]) for i in range(2)])
+
+    pts = [g0.copy()]
+    segs = []
+    k = 1
+    # first segment: u(s) = Phi_{(s-1) k T}(gamma0 + small) ~ Gamma itself with delta = 0
+    s_mesh = np.linspace(0, 1, 400)
+    U = gamma_of(s_mesh)
+    tangent = (vs / sc) / np.linalg.norm(vs / sc)     # unit tangent in scaled units; starts along vs
+    u0_prev = g0.copy()
+    total_len = 0.0
+    while total_len &lt; arclen and k &lt;= kmax:
+        def fun(s, u, k=k):
+            return k * T * F(u)
+
+        def bc(ua, ub, u0p=u0_prev.copy(), tg=tangent.copy()):
+            return np.array([np.dot(nrm, ub - g0),                        # u(1) on the line L
+                             np.dot(tg, (ua - u0p) / sc) - h])        # step h along the isochron
+        sol = solve_bvp(fun, bc, s_mesh, U, tol=tol, max_nodes=max_nodes)
+        if not sol.success:
+            if verbose:
+                print(&quot;bvp failed:&quot;, sol.message, &quot;h =&quot;, h)
+            h /= 2
+            if h &lt; 1e-7:
+                break
+            continue
+        u0 = sol.sol(0.0); delta = np.dot(vs, sol.sol(1.0) - g0)
+        if abs(delta) &gt; eta:                          # past the end of L_eta: extend by one period
+            k += 1
+            s_new = np.concatenate([sol.x * (k - 1) / k, (k - 1) / k + s_mesh[1:] / k])
+            U = np.hstack([sol.y, gamma_of(s_mesh[1:])])
+            s_mesh = s_new
+            if verbose:
+                print(f&quot;k -&gt; {k}, isochron length {total_len:.3f}&quot;)
+            continue
+        step = np.linalg.norm((u0 - u0_prev) / sc)
+        if step &gt; 2.5 * h:                            # jumped to another part of the curve: retry smaller
+            h /= 2
+            if h &lt; 1e-7:
+                break
+            continue
+        total_len += step
+        tangent = (u0 - u0_prev) / sc / max(step, 1e-300)
+        pts.append(u0.copy()); u0_prev = u0
+        if record and (len(pts) % record == 0):
+            segs.append((k, float(delta), sol.x.copy(), sol.y.copy()))
+        s_mesh, U = sol.x, sol.y
+        # adapt the step: grow when the solver is happy
+        h = min(h * 1.2, hmax)
+        if len(s_mesh) &gt; max_nodes * 0.8:
+            break
+    if record:
+        return np.array(pts), segs
+    return np.array(pts)
+
+
+def phase_points(name, pars, X, T, pts, scale=(1, 1), nper=3, tol=1e-5, maxper=80, procs=6):
+    &quot;&quot;&quot;Asymptotic phase of an arbitrary list of points (same method as phase_map).&quot;&quot;&quot;
+    jobs = [((float(p[0]), float(p[1])), T, nper, tol, maxper) for p in pts]
+    ctx = mp.get_context(&quot;spawn&quot;)
+    with ctx.Pool(procs, initializer=_init_worker, initargs=(name, pars, X, scale)) as pool:
+        res = pool.map(_phase_of, jobs, chunksize=32)
+    return np.array([r[0] for r in res]), np.array([r[2] for r in res])
+
+
+def cycle_bundle_bvp(F, orbit_t, orbit_X, T, v0, kappa0, phase_index=0, tol=1e-4, nodes=2000):
+    &quot;&quot;&quot;Paper section 2.2 (logarithmic form): compute the cycle and its stable normal bundle together,
+        u&#x27; = T F(u),   w&#x27; = T (DF(u) w - kappa w),   u(0) = u(1),  w(0) = w(1),
+        f_phase(u(0)) = 0 (u(0) at the maximum of coordinate `phase_index`),  |w(0)| = 1,
+    with unknown period T and Floquet exponent kappa (multiplier mu = exp(kappa T)).
+    Returns (s, u, w, T, kappa).&quot;&quot;&quot;
+    from scipy.integrate import solve_bvp
+    s = np.linspace(0, 1, nodes)
+    U = np.vstack([np.interp(s, orbit_t / T, orbit_X[:, i]) for i in range(2)])
+    # initial guess for the bundle: transport v0 with the variational equation would be best;
+    # a constant guess normalised to v0 is enough for the solver to converge here
+    # initial guess for the bundle: carry v0 BACKWARDS along the (interpolated) orbit with
+    # w&#x27; = DF w - kappa0 w.  Backwards in time the stable direction dominates, so this is stable.
+    from scipy.integrate import solve_ivp
+    def uorb(tt):
+        return np.array([np.interp(tt % T, orbit_t, orbit_X[:, i]) for i in range(2)])
+    def var(tt, w):
+        return jac_fd(F, uorb(tt)) @ w - kappa0 * w
+    w_end = np.asarray(v0, float) / np.linalg.norm(v0)
+    iv = solve_ivp(var, (T, 0.0), w_end, method=&quot;Radau&quot;, rtol=1e-9, atol=1e-12, dense_output=True)
+    Wg = iv.sol(s * T)
+    Wg = Wg / np.linalg.norm(Wg[:, 0])
+    Y0 = np.vstack([U, Wg])
+
+    def fun(s, Y, p):
+        T_, k_ = p
+        U_, W_ = Y[:2], Y[2:]
+        f0 = F(U_)
+        DFw = np.zeros_like(W_)
+        for i in range(2):                               # vectorised finite-difference Jacobian columns
+            h = 1e-7 * np.maximum(1.0, np.abs(U_[i]))
+            E = np.zeros_like(U_); E[i] = h
+            DFw += (F(U_ + E) - f0) / h * W_[i]
+        return np.vstack([T_ * f0, T_ * (DFw - k_ * W_)])
+
+    def bc(ya, yb, p):
+        return np.array([ya[0] - yb[0], ya[1] - yb[1], ya[2] - yb[2], ya[3] - yb[3],
+                         F(ya[:2])[phase_index], ya[2] ** 2 + ya[3] ** 2 - 1.0])
+    sol = solve_bvp(fun, bc, s, Y0, p=[T, kappa0], tol=tol, max_nodes=200000)
+    return sol.x, sol.y[:2], sol.y[2:], sol.p[0], sol.p[1], sol
+</code></pre></div></div>
+</div>
+</main>
+<footer><div class="wrap">
+  <p><b style="color:var(--fg)">notebook</b>, a guided reading of H. M. Osinga and J. Moehlis, <i>Continuation-based computation of global isochrons</i>, SIAM J. Appl. Dyn. Syst. 9 (2010) 1201&ndash;1228
+     (<a href="https://sites.me.ucsb.edu/~moehlis/moehlis_papers/isochrons.pdf" target="_blank" rel="noopener">the paper</a>).
+     Every simulation is computed by Bard Ermentrout's
+     <a href="https://sites.pitt.edu/~phase/bard/bardware/xpp/xpp.html" target="_blank" rel="noopener">XPPAUT</a>
+     through <a href="https://zetaone.github.io/pyauto-xpp/">pyauto-xpp</a>.</p>
+  <p>Made by Jeevan Kumar Gochhayat (<a href="https://github.com/ZetaOne">github.com/ZetaOne</a>) &middot;
+     <a href="https://zetaone.github.io/pyauto-xpp/">pyauto-xpp</a> &middot; <a href="https://zetaone.github.io/XPPAUT-Web/">XPPAUT-Web</a> &middot; <a href="https://github.com/ZetaOne/notebook">Source of this site</a></p>
+</div></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js" integrity="sha512-7Z9J3l1+EYfeaPKcGXu3MS/7T+w19WtKQY/n+xzmw4hZhJ9tyYmcUS+4QqAlzhicE5LAfMQSF3iFTK9bQdTxXg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js" integrity="sha512-AKaNmg8COK0zEbjTdMHJAPJ0z6VeNqvRvH4/d5M4sHJbQQUToMBtodq4HaV4fa+WV2UTfoperElm66c9/8cKmQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js" integrity="sha512-whYhDwtTmlC/NpZlCr6PSsAaLOrfjVg/iXAnC4H/dtiHawpShhT2SlIMbpIhT/IL/NrpdMm+Hq2C13+VKpHTYw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+(function () {
+  const D = window.PYX_DISPLAY, root = document.documentElement, $ = id => document.getElementById(id);
+  const THEMES = [{"id": "system", "name": "System (light/dark)", "swatch": ["#ffffff", "#5c6670", "#222326", "#2a3038"]}, {"id": "light", "name": "Light", "swatch": ["#ffffff", "#e6e6e1", "#5c6670", "#2f5d8a"]}, {"id": "dark", "name": "Dark", "swatch": ["#222326", "#34363a", "#2a3038", "#4b7fb3"]}, {"id": "midnight", "name": "Midnight Blue", "swatch": ["#101d36", "#1c3158", "#14274a", "#3d7bd9"]}, {"id": "solarized-light", "name": "Solarized Light", "swatch": ["#fdf6e3", "#eee8d5", "#586e75", "#268bd2"]}, {"id": "solarized-dark", "name": "Solarized Dark", "swatch": ["#002b36", "#073642", "#0a3a47", "#268bd2"]}, {"id": "nord", "name": "Nord", "swatch": ["#3b4252", "#4c566a", "#434c5e", "#5e81ac"]}, {"id": "dracula", "name": "Dracula", "swatch": ["#282a36", "#44475a", "#343746", "#bd93f9"]}, {"id": "sepia", "name": "Sepia", "swatch": ["#faf4e6", "#ebdfc4", "#7a6344", "#8b5a2b"]}, {"id": "contrast", "name": "High Contrast", "swatch": ["#000000", "#ffffff", "#000000", "#ffff00"]}, {"id": "funky1", "name": "Funky 1 (Fairy Floss)", "swatch": ["#5a5475", "#ffb8d1", "#c2ffdf", "#c5a3ff"]}, {"id": "funky2", "name": "Funky 2 (Night Owl)", "swatch": ["#011627", "#82aaff", "#c792ea", "#addb67"]}, {"id": "funky3", "name": "Funky 3 (Synthwave)", "swatch": ["#241b2f", "#ff7edb", "#36f9f6", "#fede5d"]}], FONTS = [["system", "System (default)", "system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"], ["serif", "Serif (Charter, Georgia)", "Charter, 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif"], ["atkinson", "Atkinson Hyperlegible", "'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"], ["lexend", "Lexend", "'Lexend', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif"]];
+  const store = {
+    get(k) { try { return localStorage.getItem(k) } catch (e) { return null } },
+    set(k, v) { try { localStorage.setItem(k, v) } catch (e) {} },
+  };
+  const changed = () => document.dispatchEvent(new CustomEvent('pyx-display'));
+  const check = (box, key, v) => { for (const b of box.querySelectorAll('button')) b.setAttribute('aria-checked', String(b.dataset[key] === v)) };
+  // the code colours follow the theme: VS Code Dark+ on dark themes, Light+ on light ones
+  function setCode(scheme) {
+    const dark = D.theme === 'system' ? matchMedia('(prefers-color-scheme: dark)').matches : D.DARK[D.theme];
+    root.dataset.code = scheme || (dark ? 'dark' : 'light');
+    for (const l of document.querySelectorAll('link[data-code]')) l.media = l.dataset.code === root.dataset.code ? 'all' : 'not all';
+  }
+  function applyTheme(id) {
+    D.theme = id;
+    if (id === 'system') delete root.dataset.theme; else root.dataset.theme = id;
+    check($('themelist'), 'theme', id);
+    setCode();
+    // the phone's status bar takes the toolbar's colour
+    const bar = getComputedStyle(root).getPropertyValue('--bar').trim(), meta = document.querySelector('meta[name="theme-color"]');
+    if (bar && meta) meta.setAttribute('content', bar);
+    changed();
+  }
+  function applySize(z) { D.size = z; root.dataset.textsize = z; check($('sizelist'), 'size', z); changed() }
+  function applyFont(f) {
+    D.font = f; root.dataset.font = f; check($('fontlist'), 'font', f);
+    // a web font is downloaded only when it is chosen
+    if (D.FONTS[f] && !$('webfont-' + f)) {
+      const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = D.FONTS[f]; l.id = 'webfont-' + f;
+      l.onload = changed; document.head.append(l);
+    }
+    if (document.fonts) document.fonts.ready.then(changed);
+    changed();
+  }
+  window.pyxSetCode = setCode;
+  const button = (box, attrs, html, onclick) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.setAttribute('role', 'radio');
+    for (const k in attrs) b.dataset[k] = attrs[k];
+    b.innerHTML = html; b.addEventListener('click', onclick); box.append(b); return b;
+  };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  for (const z of D.SIZES) {
+    const b = button($('sizelist'), { size: z }, '<b style="font-size:' + (0.95 * z / 100) + 'rem">A</b><small>' + z + '%</small>',
+      () => { applySize(z); store.set('pyauto-xpp-textsize', z) });
+    b.setAttribute('aria-label', 'Text size ' + z + '%');
+  }
+  for (const [id, name, stack] of FONTS)
+    button($('fontlist'), { font: id }, '<span style="font-family:' + esc(stack) + '">' + esc(name) + '</span>' +
+      (D.FONTS[id] ? '<small>web font</small>' : ''), () => { applyFont(id); store.set('pyauto-xpp-font', id) });
+  for (const t of THEMES)
+    button($('themelist'), { theme: t.id }, '<span class="swatch">' + t.swatch.map(c => '<i style="background:' + c + '"></i>').join('') +
+      '</span>' + esc(t.name), () => { applyTheme(t.id); store.set('pyauto-xpp-theme', t.id); closeMenus(true) });
+  applyTheme(D.theme); applySize(D.size); applyFont(D.font);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => applyTheme(D.theme));
+  // printing: light code colours on white paper
+  addEventListener('beforeprint', () => setCode('light'));
+  addEventListener('afterprint', () => setCode());
+
+  // ---- toolbar menus: Esc or a click elsewhere closes them; arrows move inside --
+  const menus = () => [...document.querySelectorAll('header details')];
+  function closeMenus(refocus) {
+    for (const d of menus()) if (d.open) { d.open = false; if (refocus) d.querySelector('summary').focus() }
+  }
+  for (const d of menus()) {
+    d.addEventListener('toggle', () => {
+      if (!d.open) return;
+      for (const o of menus()) if (o !== d) o.open = false;
+      const items = [...d.querySelectorAll('.panel button, .panel a')];
+      (items.find(b => b.getAttribute('aria-checked') === 'true') || items[0])?.focus();
+    });
+    d.addEventListener('keydown', e => {
+      const items = [...d.querySelectorAll('.panel button, .panel a')], i = items.indexOf(document.activeElement);
+      if (!d.open || i < 0) return;
+      const go = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key];
+      if (go === undefined) return;
+      e.preventDefault(); items[(go + items.length) % items.length].focus();
+    });
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && menus().some(d => d.open)) { e.preventDefault(); closeMenus(true) } });
+  document.addEventListener('pointerdown', e => { for (const d of menus()) if (d.open && !d.contains(e.target)) d.open = false });
+})();
+</script>
+<script>
+if (window.Prism && Prism.languages) {
+  Prism.languages.ode = {
+    'after-done': { pattern: /(^done[ \t]*\n)[\s\S]*/m, lookbehind: true, alias: 'comment' },
+    comment: [{ pattern: /(^|\s)#.*/m, lookbehind: true }, { pattern: /^\s*".*/m }],
+    keyword: { pattern: /^(\s*)(?:par(?:am)?|p|init|i|aux|number|num|done|set|global|table|wiener|markov|bdry|volt|special|only|export|options|load|keys|autokeys|ans|auto|try|else|end|for|shot|quit|msg|speed)\b|^\s*@/m, lookbehind: true },
+    property: { pattern: /^(\s*)(?:\w+'|d\w+\/dt|\w+\(t\+dt\))(?=\s*=)/m, lookbehind: true },
+    function: /\b\w+(?=\()/,
+    number: /(?:\b\d+(?:\.\d*)?|\B\.\d+)(?:e[+-]?\d+)?\b/i,
+    operator: /[-+*\/^=<>!]/,
+    punctuation: /[(){},;\[\]]/,
+  };
+  try { Prism.highlightAll() } catch (e) {}
+}
+for (const b of document.querySelectorAll('.cb-copy')) b.addEventListener('click', async () => {
+  const t = b.closest('.cb').querySelector('pre:not(.ln) code').textContent;
+  try { await navigator.clipboard.writeText(t); b.textContent = 'Copied' } catch (e) { b.textContent = 'Select and copy' }
+  setTimeout(() => b.textContent = 'Copy', 1500);
+});
+</script>
+
+
+</body></html>
