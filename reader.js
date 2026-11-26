@@ -488,7 +488,7 @@
       prefs: state.prefs, decks: state.decks, reading: state.reading }, null, 1);
     var a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob([data], { type: "application/json" }));
-    a.download = "notebook-highlights.json";
+    a.download = "isochrons-notebook-highlights.json";
     document.body.appendChild(a);
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);

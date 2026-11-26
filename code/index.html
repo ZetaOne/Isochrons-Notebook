@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Code · notebook</title>
-<meta name="description" content="The code behind notebook">
+<title>Code · Isochrons-Notebook</title>
+<meta name="description" content="The code behind Isochrons-Notebook">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" href="../icon-32.png"><link rel="apple-touch-icon" href="../icon-192.png">
 <script>
@@ -365,7 +365,7 @@ footer a { color: var(--fg) }
 </head><body>
 <a class="skip" href="#main">Skip to content</a>
 <header class="bar">
-  <a class="brand" href="../index.html"><img src="../icon-192.png" alt="" width="22" height="22">notebook</a>
+  <a class="brand" href="../index.html"><img src="../icon-192.png" alt="" width="22" height="22">Isochrons-Notebook</a>
   <nav class="nav" aria-label="Sections"><a href="../index.html#book">Book</a><a href="../index.html#chapters">Chapters</a><a href="../index.html#study">Study kit</a><a href="../code/index.html">Code</a><a href="../index.html#highlights">My highlights</a></nav>
   <div class="right">
     <details class="display" id="themes">
@@ -399,13 +399,13 @@ footer a { color: var(--fg) }
 <ul class="flist"><li><a href="../study/intro-ml.html">isochrons_intro_ML.py</a><span>Clock, clock reading, the phase map, isochrons near and far from the cycle, the infinitesimal PRC and large kicks.</span></li><li><a href="../study/intro-vdp.html">isochrons_intro_VdP.py</a><span>The same steps for the van der Pol oscillator.</span></li><li><a href="../study/intro-fhn.html">isochrons_intro_FHN.py</a><span>The same steps for FitzHugh&ndash;Nagumo.</span></li><li><a href="../study/intro-hh.html">isochrons_intro_HH.py</a><span>The same steps for the paper's neuron model.</span></li><li><a href="../study/ml-ode.html">isochron_ML.ode</a><span>The clock, the clock reading and its shadow, phase slices, isochrons by backward integration and the PRC with real kicks, using only Initialconds &gt; Range. The method and the experiments are written at the top.</span></li><li><a href="../study/bruteforce.html">isochron_bruteforce.sh</a><span>Brute force with <code>xppaut -silent</code>: the phase of every grid point from its spike times, isochrons as contours.</span></li><li><a href="../study/cont-sh.html">isochron_continuation.sh</a><span>The paper's Algorithm Isochron, stage by stage, with XPPAUT 8.2's AUTO run headless.</span></li><li><a href="../study/cont-py.html">isochron_continuation.py</a><span>The Python half of the continuation script: the BVP, the stages and the output files.</span></li><li><a href="../study/xps-make.html">make_isochron_xps.py</a><span>Writes an XPPAUT 8.4 script that runs stage 1 of the continuation in XPP's own AUTO window, for any set of phases. Later stages need the orbit segments joined together, which the scripting language cannot do yet.</span></li><li><a href="../study/xps-gui.html">stage1_gui.xps</a><span>Stage 1 played slowly in the XPP window, with a message for each step: inside the cycle, then outside.</span></li><li><a href="../study/xps-bvp.html">isochron_bvp.ode</a><span>The boundary value problem as an XPP file: orbit segments that end on the straight isochron through &gamma;(&theta;).</span></li><li><a href="../study/xps-read.html">read_dgm.py</a><span>Reads a saved AUTO diagram (with the start points u0) back into Python.</span></li><li><a href="../study/nb0.html">stage_00_ML_isochrons-introduction.ipynb</a><span>The clock, the clock reading, isochrons straight near the cycle, bending far from it, and what large kicks do.</span></li><li><a href="../study/nb1.html">stage_01_basics-isochron.ipynb</a><span>FitzHugh&ndash;Nagumo then the reduced Hodgkin&ndash;Huxley model, by integrating every point.</span></li><li><a href="../study/nb2.html">stage_02_fhn-isochrons-continuation.ipynb</a><span>The continuation method on FitzHugh&ndash;Nagumo.</span></li><li><a href="../study/nb3.html">stage_03_hh-isochrons-continuation.ipynb</a><span>The paper's Figure 3, by continuation.</span></li><li><a href="../study/reproduce.html">reproduce_isochrons.py</a><span>Every step of the recipe, numbered as in the recipe.</span></li><li><a href="../study/fhn-iso.html">fhn_isochrons.py</a><span>One hundred FitzHugh&ndash;Nagumo isochrons.</span></li><li><a href="../study/hh-iso.html">hh_isochrons.py</a><span>One hundred reduced Hodgkin&ndash;Huxley isochrons.</span></li><li><a href="../study/fhn-ode.html">fhn.ode</a><span>FitzHugh&ndash;Nagumo for XPPAUT.</span></li><li><a href="../study/fhn-net.html">fhn_network.ode</a><span>Many copies of FitzHugh&ndash;Nagumo in one XPP file: a whole row of the phase map in one run.</span></li><li><a href="../study/hh-ode.html">reduced_hh.ode</a><span>The reduced Hodgkin&ndash;Huxley model (4.1) of the paper, I = 10.</span></li><li><a href="../study/hh-net.html">reduced_hh_network.ode</a><span>Many copies of the reduced model in one XPP file.</span></li></ul></div>
 </main>
 <footer><div class="wrap">
-  <p><b style="color:var(--fg)">notebook</b>, a guided reading of H. M. Osinga and J. Moehlis, <i>Continuation-based computation of global isochrons</i>, SIAM J. Appl. Dyn. Syst. 9 (2010) 1201&ndash;1228
+  <p><b style="color:var(--fg)">Isochrons-Notebook</b>, a guided reading of H. M. Osinga and J. Moehlis, <i>Continuation-based computation of global isochrons</i>, SIAM J. Appl. Dyn. Syst. 9 (2010) 1201&ndash;1228
      (<a href="https://sites.me.ucsb.edu/~moehlis/moehlis_papers/isochrons.pdf" target="_blank" rel="noopener">the paper</a>).
      Every simulation is computed by Bard Ermentrout's
      <a href="https://sites.pitt.edu/~phase/bard/bardware/xpp/xpp.html" target="_blank" rel="noopener">XPPAUT</a>
      through <a href="https://zetaone.github.io/pyauto-xpp/">pyauto-xpp</a>.</p>
   <p>Made by Jeevan Kumar Gochhayat (<a href="https://github.com/ZetaOne">github.com/ZetaOne</a>) &middot;
-     <a href="https://zetaone.github.io/pyauto-xpp/">pyauto-xpp</a> &middot; <a href="https://zetaone.github.io/XPPAUT-Web/">XPPAUT-Web</a> &middot; <a href="https://github.com/ZetaOne/notebook">Source of this site</a></p>
+     <a href="https://zetaone.github.io/pyauto-xpp/">pyauto-xpp</a> &middot; <a href="https://zetaone.github.io/XPPAUT-Web/">XPPAUT-Web</a> &middot; <a href="https://github.com/ZetaOne/Isochrons-Notebook">Source of this site</a></p>
 </div></footer>
 
 <script>

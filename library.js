@@ -48,7 +48,7 @@
           c ? "Chapter " + esc(c[0]) + " · " + esc(c[1]) : esc(h.chapter)) + "</div>");
         last = ch;
       }
-      out.push('<a class="hli b-' + esc(h.color) + '" href="notebook.html#hl-' + esc(h.id) + '"><span class="q">' +
+      out.push('<a class="hli b-' + esc(h.color) + '" href="isochrons-notebook.html#hl-' + esc(h.id) + '"><span class="q">' +
         esc(h.exact.length > 260 ? h.exact.slice(0, 260) + "…" : h.exact) + "</span>" +
         (h.note ? '<span class="n">' + esc(h.note) + "</span>" : "") + "</a>");
     });
@@ -60,7 +60,7 @@
       var a = document.createElement("a");
       a.href = URL.createObjectURL(new Blob([JSON.stringify({ app: "notebook", version: 1, exported: new Date().toISOString(),
         highlights: hs, prefs: s.prefs, decks: decks, reading: s.reading }, null, 1)], { type: "application/json" }));
-      a.download = "notebook-highlights.json";
+      a.download = "isochrons-notebook-highlights.json";
       document.body.appendChild(a); a.click(); a.remove();
     });
   }
